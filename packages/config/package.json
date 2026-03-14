@@ -1,0 +1,11 @@
+{
+  "name": "@testforge/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    "./eslint": "./eslint/index.js",
+    "./prettier": "./prettier/index.cjs",
+    "./typescript/base": "./typescript/base.json"
+  }
+}
