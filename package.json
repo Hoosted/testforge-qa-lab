@@ -17,7 +17,13 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "prepare": "husky",
-    "clean": "turbo clean && rimraf node_modules"
+    "clean": "turbo clean && rimraf node_modules",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:seed": "pnpm --filter @testforge/backend prisma:seed",
+    "prisma:generate": "pnpm --filter @testforge/backend prisma:generate",
+    "prisma:migrate": "pnpm --filter @testforge/backend prisma:migrate"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
