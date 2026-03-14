@@ -1,5 +1,13 @@
 # TestForge Architecture
 
+## Architectural Decisions
+
+As decisoes arquiteturais do projeto sao registradas em ADRs.
+
+Indice principal:
+
+- [docs/adrs/README.md](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/README.md)
+
 ## Principles
 
 - Full-stack TypeScript across all apps and packages
