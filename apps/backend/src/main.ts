@@ -63,8 +63,12 @@ async function bootstrap() {
     )
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
+  try {
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document);
+  } catch (error) {
+    console.warn('Swagger setup skipped due to runtime schema generation issue.', error);
+  }
 
   prismaService.enableShutdownHooks(app);
   await app.listen(appConfig.port);

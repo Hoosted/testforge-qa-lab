@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/main.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "dev": "concurrently -k \"rimraf dist && tsc -w -p tsconfig.build.json --preserveWatchOutput\" \"node --watch dist/src/main.js\"",
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
@@ -28,6 +28,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
     "cookie-parser": "1.4.7",
+    "express": "5.1.0",
     "multer": "2.0.2",
     "passport": "0.7.0",
     "passport-jwt": "4.0.1",
@@ -44,6 +45,7 @@
     "@types/passport-jwt": "4.0.1",
     "@types/supertest": "6.0.3",
     "prisma": "6.19.2",
+    "concurrently": "9.2.1",
     "supertest": "7.2.2",
     "tsx": "4.21.0",
     "vitest": "4.1.0"
