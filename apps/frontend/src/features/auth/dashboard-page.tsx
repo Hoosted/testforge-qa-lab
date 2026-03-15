@@ -36,8 +36,9 @@ export function DashboardPage() {
           <article className="status-card" data-testid="permission-products">
             <h3>Products</h3>
             <p className="muted">
-              Browse, create, edit and delete realistic products with upload, pagination and
-              filters.
+              {user.permissions.canManageProducts
+                ? 'Browse and manage realistic products with wizard flows, upload, pagination and filters.'
+                : 'Browse realistic products with the same data surface that admins can manage.'}
             </p>
             <Link className="inline-link" to="/products">
               Open product workspace

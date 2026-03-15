@@ -47,7 +47,7 @@ Exemplos:
 - [ADR-0009](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0009-adopt-docker-compose-for-local-infrastructure.md) - Adotar Docker Compose para infraestrutura local
 - [ADR-0010](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0010-prepare-the-repository-for-test-automation.md) - Preparar o repositorio para automacao de testes
 - [ADR-0011](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0011-adopt-http-only-refresh-cookie-with-role-based-access.md) - Adotar refresh token em cookie httpOnly e autorizacao por papeis
-- [ADR-0012](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0012-adopt-products-and-admin-users-as-the-first-business-domains.md) - Adotar produtos e gestao administrativa de usuarios como primeiros dominios de negocio
+- [ADR-0012](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0012-adopt-products-and-admin-users-as-the-first-business-domains.md) - Adotar produtos e gestao administrativa de usuarios como primeiros dominios de negocio`r`n- [ADR-0013](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0013-adopt-advanced-product-wizard-for-automation-training.md) - Adotar wizard avancado de produtos para treino de automacao
 
 ## Template
 

@@ -54,4 +54,9 @@ export class ListProductsQueryDto {
   @IsOptional()
   @IsIn(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc' = 'desc';
+
+  @ApiPropertyOptional({ enum: ['400', '401', '403', '404', '409', '500'] })
+  @IsOptional()
+  @IsIn(['400', '401', '403', '404', '409', '500'])
+  simulateError?: '400' | '401' | '403' | '404' | '409' | '500';
 }

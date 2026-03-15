@@ -1,4 +1,4 @@
-export interface Healthcheck {
+﻿export interface Healthcheck {
   status: 'ok';
   service: string;
   version: string;
@@ -22,6 +22,7 @@ export type ProductStatus = (typeof productStatuses)[number];
 export interface AuthPermissionMap {
   canAccessAdminArea: boolean;
   canAccessOperatorArea: boolean;
+  canManageProducts: boolean;
 }
 
 export interface AuthUser {
@@ -102,6 +103,17 @@ export interface ProductTag {
   color: string | null;
 }
 
+export interface ProductValidationResponse {
+  available: boolean;
+  reason: string | null;
+}
+
+export interface ProductSearchOption {
+  id: string;
+  sku: string;
+  name: string;
+}
+
 export interface ProductRecord {
   id: string;
   name: string;
@@ -110,12 +122,14 @@ export interface ProductRecord {
   longDescription: string;
   price: string;
   promotionalPrice: string | null;
+  promotionEndsAt: string | null;
   cost: string;
   stockQuantity: number;
   category: ProductOption;
   supplier: ProductOption;
   status: ProductStatus;
   isActive: boolean;
+  deactivationReason: string | null;
   weight: string;
   width: string;
   height: string;
@@ -123,6 +137,8 @@ export interface ProductRecord {
   tags: ProductTag[];
   barcode: string | null;
   expirationDate: string | null;
+  featureBullets: string[];
+  relatedSkus: string[];
   imageUrl: string | null;
   createdAt: string;
   updatedAt: string;
@@ -141,6 +157,10 @@ export interface ProductMetadata {
   suppliers: ProductOption[];
   tags: ProductTag[];
   statuses: ProductStatus[];
+  recommendedSuppliersByCategory: Array<{
+    categoryId: string;
+    suppliers: ProductOption[];
+  }>;
 }
 
 export interface ProductFormPayload {
@@ -150,12 +170,14 @@ export interface ProductFormPayload {
   longDescription: string;
   price: string;
   promotionalPrice?: string;
+  promotionEndsAt?: string;
   cost: string;
   stockQuantity: number;
   categoryId: string;
   supplierId: string;
   status: ProductStatus;
   isActive: boolean;
+  deactivationReason?: string;
   weight: string;
   width: string;
   height: string;
@@ -163,6 +185,8 @@ export interface ProductFormPayload {
   tagIds?: string[];
   barcode?: string;
   expirationDate?: string;
+  featureBullets: string[];
+  relatedSkus: string[];
 }
 
 export interface ProductListQuery {
@@ -176,4 +200,5 @@ export interface ProductListQuery {
   tagIds?: string[];
   sortBy?: 'name' | 'price' | 'stockQuantity' | 'createdAt' | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
+  simulateError?: '' | '400' | '401' | '403' | '404' | '409' | '500';
 }

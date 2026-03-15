@@ -43,6 +43,7 @@ export class AuthService {
     return {
       canAccessAdminArea: role === 'ADMIN',
       canAccessOperatorArea: role === 'ADMIN' || role === 'OPERATOR',
+      canManageProducts: role === 'ADMIN',
     };
   }
 

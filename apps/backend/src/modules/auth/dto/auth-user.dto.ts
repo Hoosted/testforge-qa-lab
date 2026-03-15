@@ -6,6 +6,9 @@ class PermissionDto {
 
   @ApiProperty({ example: true })
   canAccessOperatorArea!: boolean;
+
+  @ApiProperty({ example: true })
+  canManageProducts!: boolean;
 }
 
 export class AuthUserDto {
