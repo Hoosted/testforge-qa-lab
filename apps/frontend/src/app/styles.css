@@ -23,8 +23,13 @@ select {
   font: inherit;
 }
 
+img {
+  max-width: 100%;
+  display: block;
+}
+
 .app-shell {
-  max-width: 1120px;
+  max-width: 1220px;
   margin: 0 auto;
   padding: 48px 24px 80px;
 }
@@ -64,21 +69,39 @@ select {
   line-height: 1.6;
 }
 
-.content {
+.content,
+.dashboard-grid,
+.auth-panel,
+.auth-page,
+.product-form,
+.state-panel,
+.form-panel,
+.protected-panel,
+.account-panel {
   display: grid;
   gap: 24px;
 }
 
-.top-nav {
+.top-nav,
+.action-row,
+.account-meta,
+.tag-row,
+.modal-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.top-nav a,
+.inline-link,
+.button-link {
+  text-decoration: none;
 }
 
 .top-nav a,
 .inline-link {
   color: #102134;
-  text-decoration: none;
   font-weight: 600;
 }
 
@@ -96,25 +119,42 @@ select {
   backdrop-filter: blur(12px);
 }
 
-.auth-page {
-  display: grid;
-}
-
-.auth-panel {
-  display: grid;
-  gap: 24px;
+.section-header,
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .auth-copy h2,
 .protected-panel h2,
 .account-panel h2,
-.auth-state h2 {
+.auth-state h2,
+.section-header h2,
+.form-panel h2,
+.state-panel h2 {
   margin: 0 0 8px;
 }
 
-.auth-form {
+.auth-form,
+.form-grid,
+.toolbar-grid,
+.detail-grid,
+.filters-panel,
+.credential-list,
+.status-grid,
+.products-grid {
   display: grid;
   gap: 16px;
+}
+
+.toolbar-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.compact-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .field {
@@ -123,11 +163,28 @@ select {
   font-weight: 600;
 }
 
-.field input {
+.field input,
+.field textarea,
+.field select,
+table select {
   border: 1px solid rgba(16, 33, 52, 0.16);
   border-radius: 14px;
   padding: 14px 16px;
   background: rgba(255, 255, 255, 0.92);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field-checkbox {
+  align-items: center;
+  justify-content: start;
+  grid-auto-flow: column;
+}
+
+.full-span {
+  grid-column: 1 / -1;
 }
 
 .field-error,
@@ -143,7 +200,10 @@ select {
 }
 
 .primary-button,
-.ghost-button {
+.ghost-button,
+.danger-button,
+.chip,
+.toast-close {
   border: 0;
   border-radius: 14px;
   padding: 14px 18px;
@@ -151,12 +211,22 @@ select {
   cursor: pointer;
 }
 
+.primary-button,
+.danger-button,
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .primary-button {
   background: #102134;
   color: #fff;
 }
 
-.primary-button:disabled {
+.primary-button:disabled,
+.ghost-button:disabled,
+.danger-button:disabled {
   opacity: 0.7;
   cursor: wait;
 }
@@ -166,58 +236,31 @@ select {
   color: #102134;
 }
 
-.credential-list {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.danger-button {
+  background: #7a271a;
+  color: #fff;
+}
+
+.credential-list,
+.status-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.credential-card,
+.status-card,
+.product-card {
+  border: 1px solid rgba(16, 33, 52, 0.08);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .credential-card {
-  border: 1px dashed rgba(16, 33, 52, 0.16);
-  border-radius: 16px;
-  padding: 14px;
-  display: grid;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.7);
+  border-style: dashed;
 }
 
 .credential-role {
   font-weight: 700;
-}
-
-.dashboard-grid {
-  display: grid;
-  gap: 24px;
-}
-
-.account-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.auth-state {
-  text-align: left;
-}
-
-.status-grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.status-card {
-  border-radius: 18px;
-  background: #fff;
-  padding: 18px;
-  border: 1px solid rgba(16, 33, 52, 0.08);
-}
-
-.status-card h2 {
-  margin: 0 0 8px;
-  font-size: 1rem;
 }
 
 .status-chip {
@@ -240,6 +283,218 @@ select {
   background: currentColor;
 }
 
+.status-chip-muted {
+  background: #eef2f7;
+  color: #475467;
+}
+
+.inline-metrics,
+.detail-grid {
+  margin: 0;
+}
+
+.inline-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.inline-metrics div,
+.detail-grid div {
+  border-radius: 16px;
+  background: rgba(231, 238, 245, 0.7);
+  padding: 12px 14px;
+}
+
+.inline-metrics dt,
+.detail-grid dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #60748b;
+}
+
+.inline-metrics dd,
+.detail-grid dd {
+  margin: 6px 0 0;
+  font-weight: 700;
+}
+
+.products-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.product-card {
+  gap: 18px;
+}
+
+.product-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  background: #e7eef5;
+  color: #102134;
+  padding: 10px 14px;
+}
+
+.chip-active {
+  background: #102134;
+  color: #fff;
+}
+
+.tag-badge,
+.tag-selector-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #edf3f9;
+  color: #23374d;
+  font-weight: 600;
+}
+
+.tag-selector {
+  border: 1px solid rgba(16, 33, 52, 0.12);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.tag-selector legend {
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+.pagination-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.detail-grid-panel {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: 24px;
+}
+
+.product-hero-media {
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #dce7f2, #f4f8fb);
+  min-height: 280px;
+}
+
+.product-hero-media img,
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  display: grid;
+  place-items: center;
+  color: #60748b;
+  font-weight: 700;
+}
+
+.detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.table-panel {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(16, 33, 52, 0.08);
+}
+
+th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #60748b;
+}
+
+.toast-stack {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  display: grid;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.toast {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 18px;
+  padding: 16px;
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(16, 33, 52, 0.22);
+}
+
+.toast p {
+  margin: 6px 0 0;
+  color: inherit;
+}
+
+.toast-success {
+  background: #14532d;
+}
+
+.toast-error {
+  background: #7a271a;
+}
+
+.toast-close {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  min-width: 24px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 33, 52, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 999;
+}
+
+.modal-card {
+  width: min(520px, 100%);
+  background: #fff;
+  color: #102134;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 18px 50px rgba(16, 33, 52, 0.24);
+}
+
 .muted {
   color: #60748b;
 }
@@ -248,17 +503,37 @@ code {
   font-family: 'Cascadia Code', Consolas, monospace;
 }
 
+@media (max-width: 860px) {
+  .detail-grid-panel,
+  .section-header,
+  .section-header-inline,
+  .pagination-panel,
+  .hero-topline {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-grid-panel {
+    display: grid;
+  }
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 32px 16px 56px;
   }
 
-  .hero-topline {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .panel {
     padding: 20px;
+  }
+
+  .inline-metrics,
+  .products-grid,
+  .detail-grid,
+  .toolbar-grid,
+  .status-grid,
+  .credential-list {
+    grid-template-columns: 1fr;
   }
 }

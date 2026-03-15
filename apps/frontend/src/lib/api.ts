@@ -25,8 +25,11 @@ export async function apiRequest<TResponse>(
   options: RequestOptions = {},
 ): Promise<TResponse> {
   const headers = new Headers(options.headers);
+  const isFormData = options.body instanceof FormData;
 
-  headers.set('Content-Type', 'application/json');
+  if (!isFormData && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   if (options.accessToken) {
     headers.set('Authorization', `Bearer ${options.accessToken}`);

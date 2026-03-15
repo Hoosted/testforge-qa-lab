@@ -33,6 +33,17 @@ export function DashboardPage() {
       <div className="panel">
         <p className="eyebrow">Permissions</p>
         <div className="status-grid">
+          <article className="status-card" data-testid="permission-products">
+            <h3>Products</h3>
+            <p className="muted">
+              Browse, create, edit and delete realistic products with upload, pagination and
+              filters.
+            </p>
+            <Link className="inline-link" to="/products">
+              Open product workspace
+            </Link>
+          </article>
+
           <article className="status-card" data-testid="permission-operator">
             <h3>Operator area</h3>
             <p className="muted">

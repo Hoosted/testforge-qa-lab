@@ -6,6 +6,10 @@ import { LoginPage } from '@/features/auth/login-page';
 import { OperatorPage } from '@/features/auth/operator-page';
 import { ProtectedRoute } from '@/features/auth/components/protected-route';
 import { RoleRoute } from '@/features/auth/components/role-route';
+import { ProductDetailPage } from '@/features/products/product-detail-page';
+import { ProductFormPage } from '@/features/products/product-form-page';
+import { ProductsPage } from '@/features/products/products-page';
+import { AdminUsersPage } from '@/features/users/admin-users-page';
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +28,22 @@ export const router = createBrowserRouter([
             element: <DashboardPage />,
           },
           {
+            path: 'products',
+            element: <ProductsPage />,
+          },
+          {
+            path: 'products/new',
+            element: <ProductFormPage />,
+          },
+          {
+            path: 'products/:productId',
+            element: <ProductDetailPage />,
+          },
+          {
+            path: 'products/:productId/edit',
+            element: <ProductFormPage />,
+          },
+          {
             element: <RoleRoute allow={['ADMIN', 'OPERATOR']} />,
             children: [
               {
@@ -38,6 +58,10 @@ export const router = createBrowserRouter([
               {
                 path: 'admin',
                 element: <AdminPage />,
+              },
+              {
+                path: 'admin/users',
+                element: <AdminUsersPage />,
               },
             ],
           },

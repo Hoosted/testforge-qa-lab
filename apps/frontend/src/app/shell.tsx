@@ -11,8 +11,10 @@ export function AppShell() {
           <p className="eyebrow">TestForge</p>
           <nav className="top-nav" data-testid="top-navigation">
             <Link to="/">Home</Link>
+            {isAuthenticated ? <Link to="/products">Products</Link> : null}
             {isAuthenticated ? <Link to="/operator">Operator</Link> : null}
             {user?.permissions.canAccessAdminArea ? <Link to="/admin">Admin</Link> : null}
+            {user?.permissions.canAccessAdminArea ? <Link to="/admin/users">Users</Link> : null}
             {!isAuthenticated ? <Link to="/login">Login</Link> : null}
           </nav>
         </div>
