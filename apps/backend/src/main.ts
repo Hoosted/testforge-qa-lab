@@ -11,12 +11,15 @@ import { RequestLoggingInterceptor } from './common/interceptors/request-logging
 import { PrismaService } from './modules/prisma/prisma.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: true,
-  });
-  const configService = app.get(ConfigService);
-  const prismaService = app.get(PrismaService);
+  const app = await NestFactory.create(AppModule);
+  const configService: ConfigService = app.get(ConfigService);
+  const prismaService: PrismaService = app.get(PrismaService);
   const appConfig = configService.getOrThrow<AppEnvironment>('app');
+
+  app.enableCors({
+    origin: appConfig.frontendUrl,
+    credentials: true,
+  });
 
   app.setGlobalPrefix('api');
   app.enableVersioning({
