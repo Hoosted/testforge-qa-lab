@@ -18,6 +18,12 @@ enum UserStatus {
   DISABLED
 }
 
+enum ProductStatus {
+  DRAFT
+  READY
+  ARCHIVED
+}
+
 model User {
   id              String           @id @default(cuid())
   name            String
@@ -27,6 +33,8 @@ model User {
   status          UserStatus       @default(ACTIVE)
   lastLoginAt     DateTime?
   refreshSessions RefreshSession[]
+  createdProducts Product[]        @relation("ProductCreatedBy")
+  updatedProducts Product[]        @relation("ProductUpdatedBy")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -43,4 +51,79 @@ model RefreshSession {
 
   @@index([userId])
   @@unique([userId, tokenHash])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Supplier {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  email       String?
+  phone       String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Tag {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  color       String?
+  productTags ProductTag[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Product {
+  id                String         @id @default(cuid())
+  name              String
+  sku               String         @unique
+  shortDescription  String
+  longDescription   String
+  price             Decimal        @db.Decimal(10, 2)
+  promotionalPrice  Decimal?       @db.Decimal(10, 2)
+  cost              Decimal        @db.Decimal(10, 2)
+  stockQuantity     Int            @default(0)
+  categoryId        String
+  supplierId        String
+  status            ProductStatus  @default(DRAFT)
+  isActive          Boolean        @default(true)
+  weight            Decimal        @db.Decimal(10, 2)
+  width             Decimal        @db.Decimal(10, 2)
+  height            Decimal        @db.Decimal(10, 2)
+  length            Decimal        @db.Decimal(10, 2)
+  barcode           String?        @unique
+  expirationDate    DateTime?
+  imageUrl          String?
+  createdById       String
+  lastUpdatedById   String
+  category          Category       @relation(fields: [categoryId], references: [id])
+  supplier          Supplier       @relation(fields: [supplierId], references: [id])
+  createdBy         User           @relation("ProductCreatedBy", fields: [createdById], references: [id])
+  lastUpdatedBy     User           @relation("ProductUpdatedBy", fields: [lastUpdatedById], references: [id])
+  productTags       ProductTag[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([name])
+  @@index([status])
+  @@index([isActive])
+  @@index([categoryId])
+  @@index([supplierId])
+}
+
+model ProductTag {
+  productId String
+  tagId     String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
 }

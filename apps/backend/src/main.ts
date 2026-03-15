@@ -4,6 +4,9 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import express from 'express';
+import { existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { AppModule } from './app.module';
 import type { AppEnvironment } from './config/app.environment';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -27,6 +30,11 @@ async function bootstrap() {
     defaultVersion: '1',
   });
   app.use(cookieParser());
+  const uploadsPath = join(process.cwd(), 'apps', 'backend', 'uploads');
+  if (!existsSync(uploadsPath)) {
+    mkdirSync(uploadsPath, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsPath));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

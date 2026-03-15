@@ -16,6 +16,6 @@
       "@testforge/shared-types": ["../../packages/shared-types/src"]
     }
   },
-  "include": ["src", "prisma"],
+  "include": ["src", "prisma", "test", "vitest.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
   UnauthorizedException,
   UseGuards,
@@ -19,7 +20,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import type { AppEnvironment } from '../../config/app.environment';
 import { ApiErrorResponseDto } from '../../common/dto/api-error-response.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -31,10 +32,6 @@ import { AuthUserDto } from './dto/auth-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { LoginDto } from './dto/login.dto';
-
-interface HttpRequestLike {
-  cookies?: Record<string, unknown>;
-}
 
 @ApiTags('auth')
 @Controller({
@@ -70,8 +67,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh the current authenticated session' })
   @ApiOkResponse({ type: AuthSessionResponseDto })
   @ApiUnauthorizedResponse({ type: ApiErrorResponseDto })
-  async refresh(@Res({ passthrough: true }) response: Response) {
-    const refreshToken = this.getRefreshTokenFromCookies(this.getResponseCookies(response));
+  async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    const refreshToken = this.getRefreshTokenFromCookies(request.cookies);
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is missing');
@@ -91,8 +88,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Invalidate the current authenticated session' })
   @ApiOkResponse({ type: AuthMessageResponseDto })
-  async logout(@Res({ passthrough: true }) response: Response) {
-    const refreshToken = this.getRefreshTokenFromCookies(this.getResponseCookies(response));
+  async logout(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    const refreshToken = this.getRefreshTokenFromCookies(request.cookies);
 
     if (refreshToken) {
       await this.authService.revokeRefreshSession(refreshToken);
@@ -170,11 +167,5 @@ export class AuthController {
     const cookieValue = cookies?.[appConfig.auth.cookieName];
 
     return typeof cookieValue === 'string' ? cookieValue : null;
-  }
-
-  private getResponseCookies(response: Response) {
-    const request = response.req as HttpRequestLike | undefined;
-
-    return request?.cookies;
   }
 }
