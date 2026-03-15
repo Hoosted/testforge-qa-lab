@@ -33,6 +33,13 @@ select {
   margin-bottom: 32px;
 }
 
+.hero-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
 .eyebrow {
   margin: 0 0 12px;
   letter-spacing: 0.12em;
@@ -62,6 +69,24 @@ select {
   gap: 24px;
 }
 
+.top-nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.top-nav a,
+.inline-link {
+  color: #102134;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.top-nav a:hover,
+.inline-link:hover {
+  text-decoration: underline;
+}
+
 .panel {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(16, 33, 52, 0.08);
@@ -69,6 +94,112 @@ select {
   padding: 24px;
   box-shadow: 0 12px 40px rgba(16, 33, 52, 0.08);
   backdrop-filter: blur(12px);
+}
+
+.auth-page {
+  display: grid;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 24px;
+}
+
+.auth-copy h2,
+.protected-panel h2,
+.account-panel h2,
+.auth-state h2 {
+  margin: 0 0 8px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.field input {
+  border: 1px solid rgba(16, 33, 52, 0.16);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.field-error,
+.form-alert {
+  color: #b42318;
+}
+
+.form-alert {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #fee4e2;
+  border: 1px solid #fda29b;
+}
+
+.primary-button,
+.ghost-button {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #102134;
+  color: #fff;
+}
+
+.primary-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.ghost-button {
+  background: #e7eef5;
+  color: #102134;
+}
+
+.credential-list {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.credential-card {
+  border: 1px dashed rgba(16, 33, 52, 0.16);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.credential-role {
+  font-weight: 700;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.account-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.auth-state {
+  text-align: left;
 }
 
 .status-grid {
@@ -120,6 +251,11 @@ code {
 @media (max-width: 720px) {
   .app-shell {
     padding: 32px 16px 56px;
+  }
+
+  .hero-topline {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .panel {

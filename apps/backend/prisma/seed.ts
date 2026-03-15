@@ -1,29 +1,46 @@
-import { PrismaClient, UserRole, UserStatus } from '@prisma/client';
+import { PrismaClient, UserStatus, type UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash('TestForge@123', 10);
+  const defaultPasswordHash = await bcrypt.hash('TestForge@123', 10);
 
-  await prisma.user.upsert({
-    where: {
-      email: 'admin@testforge.local',
-    },
-    update: {
-      name: 'TestForge Admin',
-      passwordHash,
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
-    },
-    create: {
+  const seedUsers = [
+    {
       name: 'TestForge Admin',
       email: 'admin@testforge.local',
-      passwordHash,
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
+      role: 'ADMIN' as UserRole,
+      passwordHash: defaultPasswordHash,
     },
-  });
+    {
+      name: 'TestForge Operator',
+      email: 'operator@testforge.local',
+      role: 'OPERATOR' as UserRole,
+      passwordHash: defaultPasswordHash,
+    },
+  ];
+
+  for (const user of seedUsers) {
+    await prisma.user.upsert({
+      where: {
+        email: user.email,
+      },
+      update: {
+        name: user.name,
+        passwordHash: user.passwordHash,
+        role: user.role,
+        status: UserStatus.ACTIVE,
+      },
+      create: {
+        name: user.name,
+        email: user.email,
+        passwordHash: user.passwordHash,
+        role: user.role,
+        status: UserStatus.ACTIVE,
+      },
+    });
+  }
 }
 
 void main()

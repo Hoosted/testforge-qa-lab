@@ -3,9 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import type { JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { Reflector } from '@nestjs/core';
 import type { AppEnvironment } from '../../config/app.environment';
+import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 type JwtExpiration = NonNullable<JwtSignOptions['expiresIn']>;
@@ -29,7 +32,8 @@ type JwtExpiration = NonNullable<JwtSignOptions['expiresIn']>;
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard],
-  exports: [AuthService, PassportModule, JwtModule, JwtAuthGuard],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard, Reflector],
+  exports: [AuthService, PassportModule, JwtModule, JwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}

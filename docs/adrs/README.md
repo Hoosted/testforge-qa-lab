@@ -46,6 +46,7 @@ Exemplos:
 - [ADR-0008](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0008-adopt-jwt-access-and-refresh-token-strategy.md) - Adotar JWT com access token e refresh token
 - [ADR-0009](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0009-adopt-docker-compose-for-local-infrastructure.md) - Adotar Docker Compose para infraestrutura local
 - [ADR-0010](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0010-prepare-the-repository-for-test-automation.md) - Preparar o repositório para automação de testes
+- [ADR-0011](C:/Users/PabloHenrique/projects/testforge-qa-lab/docs/adrs/0011-adopt-http-only-refresh-cookie-with-role-based-access.md) - Adotar refresh token em cookie httpOnly e autorização por papéis
 
 ## Template
 
