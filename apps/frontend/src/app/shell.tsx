@@ -12,9 +12,17 @@ export function AppShell() {
           <nav className="top-nav" data-testid="top-navigation">
             <Link to="/">Home</Link>
             {isAuthenticated ? <Link to="/products">Products</Link> : null}
+            {isAuthenticated ? <Link to="/profile">Profile</Link> : null}
             {isAuthenticated ? <Link to="/operator">Operator</Link> : null}
             {user?.permissions.canAccessAdminArea ? <Link to="/admin">Admin</Link> : null}
+            {user?.permissions.canManageCatalog ? (
+              <Link to="/admin/categories">Categories</Link>
+            ) : null}
+            {user?.permissions.canManageCatalog ? (
+              <Link to="/admin/suppliers">Suppliers</Link>
+            ) : null}
             {user?.permissions.canAccessAdminArea ? <Link to="/admin/users">Users</Link> : null}
+            {user?.permissions.canAccessAdminArea ? <Link to="/admin/audit">Audit</Link> : null}
             {!isAuthenticated ? <Link to="/login">Login</Link> : null}
           </nav>
         </div>

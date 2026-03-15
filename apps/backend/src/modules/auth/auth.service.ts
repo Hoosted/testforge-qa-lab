@@ -44,6 +44,9 @@ export class AuthService {
       canAccessAdminArea: role === 'ADMIN',
       canAccessOperatorArea: role === 'ADMIN' || role === 'OPERATOR',
       canManageProducts: role === 'ADMIN',
+      canManageCatalog: role === 'ADMIN',
+      canManageUsers: role === 'ADMIN',
+      canViewAuditLogs: true,
     };
   }
 

@@ -9,6 +9,15 @@ class PermissionDto {
 
   @ApiProperty({ example: true })
   canManageProducts!: boolean;
+
+  @ApiProperty({ example: true })
+  canManageCatalog!: boolean;
+
+  @ApiProperty({ example: true })
+  canManageUsers!: boolean;
+
+  @ApiProperty({ example: true })
+  canViewAuditLogs!: boolean;
 }
 
 export class AuthUserDto {
