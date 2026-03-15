@@ -1,4 +1,4 @@
--- CreateSchema
+﻿-- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
 -- CreateEnum
@@ -81,18 +81,22 @@ CREATE TABLE "Product" (
     "longDescription" TEXT NOT NULL,
     "price" DECIMAL(10,2) NOT NULL,
     "promotionalPrice" DECIMAL(10,2),
+    "promotionEndsAt" TIMESTAMP(3),
     "cost" DECIMAL(10,2) NOT NULL,
     "stockQuantity" INTEGER NOT NULL DEFAULT 0,
     "categoryId" TEXT NOT NULL,
     "supplierId" TEXT NOT NULL,
     "status" "ProductStatus" NOT NULL DEFAULT 'DRAFT',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "deactivationReason" TEXT,
     "weight" DECIMAL(10,2) NOT NULL,
     "width" DECIMAL(10,2) NOT NULL,
     "height" DECIMAL(10,2) NOT NULL,
     "length" DECIMAL(10,2) NOT NULL,
     "barcode" TEXT,
     "expirationDate" TIMESTAMP(3),
+    "featureBullets" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+    "relatedSkus" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     "imageUrl" TEXT,
     "createdById" TEXT NOT NULL,
     "lastUpdatedById" TEXT NOT NULL,

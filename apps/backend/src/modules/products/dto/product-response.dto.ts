@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class ProductOptionDto {
   @ApiProperty()
@@ -49,6 +49,9 @@ export class ProductResponseDto {
   @ApiProperty({ nullable: true })
   promotionalPrice!: string | null;
 
+  @ApiProperty({ nullable: true })
+  promotionEndsAt!: string | null;
+
   @ApiProperty()
   cost!: string;
 
@@ -66,6 +69,9 @@ export class ProductResponseDto {
 
   @ApiProperty()
   isActive!: boolean;
+
+  @ApiProperty({ nullable: true })
+  deactivationReason!: string | null;
 
   @ApiProperty()
   weight!: string;
@@ -88,6 +94,12 @@ export class ProductResponseDto {
   @ApiProperty({ nullable: true })
   expirationDate!: string | null;
 
+  @ApiProperty({ isArray: true, type: String })
+  featureBullets!: string[];
+
+  @ApiProperty({ isArray: true, type: String })
+  relatedSkus!: string[];
+
   @ApiProperty({ nullable: true })
   imageUrl!: string | null;
 
@@ -102,4 +114,12 @@ export class ProductResponseDto {
 
   @ApiProperty({ type: ProductAuditUserDto })
   lastUpdatedBy!: ProductAuditUserDto;
+}
+
+export class ProductValidationResponseDto {
+  @ApiProperty()
+  available!: boolean;
+
+  @ApiPropertyOptional({ nullable: true })
+  reason!: string | null;
 }

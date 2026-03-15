@@ -89,18 +89,22 @@ model Product {
   longDescription   String
   price             Decimal        @db.Decimal(10, 2)
   promotionalPrice  Decimal?       @db.Decimal(10, 2)
+  promotionEndsAt   DateTime?
   cost              Decimal        @db.Decimal(10, 2)
   stockQuantity     Int            @default(0)
   categoryId        String
   supplierId        String
   status            ProductStatus  @default(DRAFT)
   isActive          Boolean        @default(true)
+  deactivationReason String?
   weight            Decimal        @db.Decimal(10, 2)
   width             Decimal        @db.Decimal(10, 2)
   height            Decimal        @db.Decimal(10, 2)
   length            Decimal        @db.Decimal(10, 2)
   barcode           String?        @unique
   expirationDate    DateTime?
+  featureBullets    String[]       @default([])
+  relatedSkus       String[]       @default([])
   imageUrl          String?
   createdById       String
   lastUpdatedById   String

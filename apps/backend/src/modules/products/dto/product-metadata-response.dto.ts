@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+﻿import { ApiProperty } from '@nestjs/swagger';
 
 class MetadataItemDto {
   @ApiProperty()
@@ -13,6 +13,14 @@ class MetadataTagItemDto extends MetadataItemDto {
   color!: string | null;
 }
 
+class RecommendedSuppliersByCategoryDto {
+  @ApiProperty()
+  categoryId!: string;
+
+  @ApiProperty({ isArray: true, type: MetadataItemDto })
+  suppliers!: MetadataItemDto[];
+}
+
 export class ProductMetadataResponseDto {
   @ApiProperty({ isArray: true, type: MetadataItemDto })
   categories!: MetadataItemDto[];
@@ -25,4 +33,7 @@ export class ProductMetadataResponseDto {
 
   @ApiProperty({ isArray: true, type: String })
   statuses!: string[];
+
+  @ApiProperty({ isArray: true, type: RecommendedSuppliersByCategoryDto })
+  recommendedSuppliersByCategory!: RecommendedSuppliersByCategoryDto[];
 }

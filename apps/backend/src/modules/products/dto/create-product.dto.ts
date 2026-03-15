@@ -1,7 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
+  IsDateString,
+  IsIn,
   IsInt,
   IsNumberString,
   IsOptional,
@@ -9,8 +11,6 @@ import {
   MaxLength,
   Min,
   MinLength,
-  IsDateString,
-  IsIn,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -43,6 +43,11 @@ export class CreateProductDto {
   @IsNumberString()
   promotionalPrice?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  promotionEndsAt?: string;
+
   @ApiProperty()
   @IsNumberString()
   cost!: string;
@@ -67,6 +72,12 @@ export class CreateProductDto {
   @ApiProperty()
   @IsBoolean()
   isActive!: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(180)
+  deactivationReason?: string;
 
   @ApiProperty()
   @IsNumberString()
@@ -99,4 +110,14 @@ export class CreateProductDto {
   @IsOptional()
   @IsDateString()
   expirationDate?: string;
+
+  @ApiProperty({ isArray: true, type: String })
+  @IsArray()
+  @IsString({ each: true })
+  featureBullets!: string[];
+
+  @ApiProperty({ isArray: true, type: String })
+  @IsArray()
+  @IsString({ each: true })
+  relatedSkus!: string[];
 }

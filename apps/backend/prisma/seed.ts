@@ -1,4 +1,4 @@
-import { PrismaClient, UserStatus, type UserRole } from '@prisma/client';
+﻿import { PrismaClient, UserStatus, type UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -26,6 +26,7 @@ async function main() {
     email: string;
     role: UserRole;
   }> = [];
+
   for (const user of seedUsers) {
     const createdUser = await prisma.user.upsert({
       where: { email: user.email },
@@ -120,10 +121,11 @@ async function main() {
           'Premium wireless headphones built for long work sessions and detailed product QA exercises.',
         price: '599.90',
         promotionalPrice: '499.90',
+        promotionEndsAt: new Date('2026-12-01T00:00:00.000Z'),
         cost: '320.00',
         stockQuantity: 42,
-        categoryId: electronics.id,
-        supplierId: acmeSupplier.id,
+        category: { connect: { id: electronics.id } },
+        supplier: { connect: { id: acmeSupplier.id } },
         status: 'READY',
         isActive: true,
         weight: '0.45',
@@ -131,8 +133,14 @@ async function main() {
         height: '22.00',
         length: '9.50',
         barcode: '7891000000011',
-        createdById: adminUser.id,
-        lastUpdatedById: operatorUser.id,
+        featureBullets: [
+          'Active noise cancelling',
+          'Bluetooth multipoint',
+          'QA-friendly seed data',
+        ],
+        relatedSkus: ['TF-SNACK-002'],
+        createdBy: { connect: { id: adminUser.id } },
+        lastUpdatedBy: { connect: { id: operatorUser.id } },
         productTags: {
           create: [{ tagId: tagFeatured.id }, { tagId: tagFragile.id }],
         },
@@ -155,10 +163,11 @@ async function main() {
           'A curated snack pack with predictable shelf-life data, useful for testing optional expiration dates.',
         price: '49.90',
         promotionalPrice: '39.90',
+        promotionEndsAt: new Date('2026-10-31T00:00:00.000Z'),
         cost: '21.50',
         stockQuantity: 120,
-        categoryId: grocery.id,
-        supplierId: freshSupplier.id,
+        category: { connect: { id: grocery.id } },
+        supplier: { connect: { id: freshSupplier.id } },
         status: 'READY',
         isActive: true,
         weight: '0.80',
@@ -167,8 +176,14 @@ async function main() {
         length: '18.00',
         barcode: '7891000000028',
         expirationDate: new Date('2026-12-31T00:00:00.000Z'),
-        createdById: adminUser.id,
-        lastUpdatedById: adminUser.id,
+        featureBullets: [
+          'Shelf-life scenario',
+          'Predictable expiration date',
+          'Category-based validation',
+        ],
+        relatedSkus: ['TF-HEADPHONE-001'],
+        createdBy: { connect: { id: adminUser.id } },
+        lastUpdatedBy: { connect: { id: adminUser.id } },
         productTags: {
           create: [{ tagId: tagSeasonal.id }],
         },

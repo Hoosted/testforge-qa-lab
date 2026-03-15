@@ -211,4 +211,40 @@ describe('Auth flow (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
   });
+
+  it('blocks operators from product write operations', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'operator@testforge.local',
+        password: 'TestForge@123',
+      })
+      .expect(200);
+
+    const accessToken = loginResponse.body.accessToken;
+
+    await request(app.getHttpServer())
+      .post('/api/v1/products')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'Unauthorized Product',
+        sku: 'TF-UNAUTHORIZED-001',
+        shortDescription: 'Should not be created by operator',
+        longDescription: 'Operators should receive a forbidden response for write operations.',
+        price: '100.00',
+        cost: '60.00',
+        stockQuantity: 10,
+        categoryId: 'category-1',
+        supplierId: 'supplier-1',
+        status: 'DRAFT',
+        isActive: true,
+        weight: '1.00',
+        width: '1.00',
+        height: '1.00',
+        length: '1.00',
+        featureBullets: ['Forbidden mutation path'],
+        relatedSkus: [],
+      })
+      .expect(403);
+  });
 });
