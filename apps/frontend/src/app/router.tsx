@@ -32,16 +32,8 @@ export const router = createBrowserRouter([
             element: <ProductsPage />,
           },
           {
-            path: 'products/new',
-            element: <ProductFormPage />,
-          },
-          {
             path: 'products/:productId',
             element: <ProductDetailPage />,
-          },
-          {
-            path: 'products/:productId/edit',
-            element: <ProductFormPage />,
           },
           {
             element: <RoleRoute allow={['ADMIN', 'OPERATOR']} />,
@@ -55,6 +47,14 @@ export const router = createBrowserRouter([
           {
             element: <RoleRoute allow={['ADMIN']} />,
             children: [
+              {
+                path: 'products/new',
+                element: <ProductFormPage />,
+              },
+              {
+                path: 'products/:productId/edit',
+                element: <ProductFormPage />,
+              },
               {
                 path: 'admin',
                 element: <AdminPage />,

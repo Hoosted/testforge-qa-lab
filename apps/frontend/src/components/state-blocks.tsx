@@ -38,3 +38,16 @@ export function EmptyState({ title, description, action, testId }: StateBlockPro
     </section>
   );
 }
+
+export function SkeletonPanel({ rows = 4, testId }: { rows?: number; testId: string }) {
+  return (
+    <section className="panel state-panel" data-testid={testId}>
+      <p className="eyebrow">Loading</p>
+      <div className="skeleton-grid">
+        {Array.from({ length: rows }).map((_, index) => (
+          <span key={index} className="skeleton-line" />
+        ))}
+      </div>
+    </section>
+  );
+}

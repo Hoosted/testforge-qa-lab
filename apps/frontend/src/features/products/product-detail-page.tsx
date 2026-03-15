@@ -6,7 +6,7 @@ import { getProduct, type AuthorizedRequest } from '@/features/products/products
 
 export function ProductDetailPage() {
   const { productId } = useParams();
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, user } = useAuth();
   const productQuery = useQuery({
     queryKey: ['products', productId, 'detail'],
     queryFn: () => getProduct(fetchWithAuth as AuthorizedRequest, productId ?? ''),
@@ -52,9 +52,11 @@ export function ProductDetailPage() {
           <Link className="ghost-button button-link" to="/products">
             Back
           </Link>
-          <Link className="primary-button button-link" to={`/products/${product.id}/edit`}>
-            Edit product
-          </Link>
+          {user?.permissions.canManageProducts ? (
+            <Link className="primary-button button-link" to={`/products/${product.id}/edit`}>
+              Edit product
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -129,6 +131,20 @@ export function ProductDetailPage() {
               {tag.name}
             </span>
           ))}
+        </div>
+        <div className="detail-list-block">
+          <h3>Feature bullets</h3>
+          <ul>
+            {product.featureBullets.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <h3>Related SKUs</h3>
+          <p className="muted">
+            {product.relatedSkus.length > 0
+              ? product.relatedSkus.join(', ')
+              : 'No related products configured.'}
+          </p>
         </div>
       </div>
     </section>

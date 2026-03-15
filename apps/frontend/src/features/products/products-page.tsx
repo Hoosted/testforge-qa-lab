@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ProductListQuery, ProductRecord } from '@testforge/shared-types';
 import { Link } from 'react-router-dom';
 import { ConfirmModal } from '@/components/confirm-modal';
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-blocks';
+import { EmptyState, ErrorState, SkeletonPanel } from '@/components/state-blocks';
 import { useAuth } from '@/features/auth/auth-context';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { featureFlags } from '@/lib/feature-flags';
 import {
   deleteProduct,
   getProductMetadata,
@@ -24,6 +26,7 @@ type ProductListState = {
   tagIds: string[];
   sortBy: NonNullable<ProductListQuery['sortBy']>;
   sortOrder: NonNullable<ProductListQuery['sortOrder']>;
+  simulateError: '' | '400' | '401' | '403' | '404' | '409' | '500';
 };
 
 const initialQuery: ProductListState = {
@@ -37,27 +40,45 @@ const initialQuery: ProductListState = {
   tagIds: [],
   sortBy: 'updatedAt',
   sortOrder: 'desc',
+  simulateError: '',
 };
 
 export function ProductsPage() {
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, user } = useAuth();
   const { pushToast } = useToast();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState<ProductListState>(initialQuery);
+  const [searchValue, setSearchValue] = useState('');
   const [productToDelete, setProductToDelete] = useState<ProductRecord | null>(null);
+  const debouncedSearch = useDebouncedValue(searchValue, 450);
+
+  const effectiveQuery = useMemo<ProductListQuery>(
+    () => ({
+      ...query,
+      search: debouncedSearch,
+    }),
+    [debouncedSearch, query],
+  );
 
   const productsQuery = useQuery({
-    queryKey: ['products', query],
-    queryFn: () => listProducts(fetchWithAuth as AuthorizedRequest, query),
+    queryKey: ['products', effectiveQuery],
+    queryFn: () => listProducts(fetchWithAuth as AuthorizedRequest, effectiveQuery),
+    placeholderData: keepPreviousData,
   });
 
   const metadataQuery = useQuery({
-    queryKey: ['products', 'metadata'],
-    queryFn: () => getProductMetadata(fetchWithAuth as AuthorizedRequest),
+    queryKey: ['products', 'metadata', query.simulateError],
+    queryFn: () =>
+      getProductMetadata(fetchWithAuth as AuthorizedRequest, query.simulateError || undefined),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (productId: string) => deleteProduct(fetchWithAuth as AuthorizedRequest, productId),
+    mutationFn: (productId: string) =>
+      deleteProduct(
+        fetchWithAuth as AuthorizedRequest,
+        productId,
+        query.simulateError || undefined,
+      ),
     onSuccess: (payload) => {
       pushToast({ title: 'Product deleted', description: payload.message });
       setProductToDelete(null);
@@ -72,16 +93,10 @@ export function ProductsPage() {
     },
   });
 
-  const activeTagFilter = useMemo(() => query.tagIds ?? [], [query.tagIds]);
+  const activeTagFilter = useMemo(() => query.tagIds, [query.tagIds]);
 
   if (productsQuery.isLoading && !productsQuery.data) {
-    return (
-      <LoadingState
-        title="Loading product catalog"
-        description="We are preparing products, filters and summary data for this workspace."
-        testId="products-loading"
-      />
-    );
+    return <SkeletonPanel rows={5} testId="products-skeleton" />;
   }
 
   if (productsQuery.isError || metadataQuery.isError) {
@@ -112,38 +127,81 @@ export function ProductsPage() {
       <div className="panel section-header">
         <div>
           <p className="eyebrow">Products</p>
-          <h2>Inventory management with realistic product data</h2>
+          <h2>Inventory workspace built for automation</h2>
           <p className="muted">
-            Search, filter, order and manage product records designed for API, UI and E2E test
-            practice.
+            Debounced search, server-side sorting and rich role-aware actions live side by side.
           </p>
         </div>
-        <Link
-          className="primary-button button-link"
-          to="/products/new"
-          data-testid="create-product-link"
-        >
-          New product
-        </Link>
+        {user?.permissions.canManageProducts ? (
+          <Link
+            className="primary-button button-link"
+            to="/products/new"
+            data-testid="create-product-link"
+          >
+            New product
+          </Link>
+        ) : (
+          <div className="read-only-badge" data-testid="products-read-only-banner">
+            Operator accounts can browse only.
+          </div>
+        )}
       </div>
+
+      {featureFlags.automationLab ? (
+        <div className="panel automation-lab" data-testid="products-automation-lab">
+          <div className="section-header-inline">
+            <div>
+              <p className="eyebrow">Automation lab</p>
+              <h3>Controlled error simulation and feature flags</h3>
+            </div>
+            <label className="field">
+              Simulate server error
+              <select
+                value={query.simulateError ?? ''}
+                onChange={(event) =>
+                  setQuery((current) => ({
+                    ...current,
+                    simulateError: event.target.value as ProductListState['simulateError'],
+                  }))
+                }
+                data-testid="simulate-error-select"
+              >
+                <option value="">Disabled</option>
+                <option value="400">400</option>
+                <option value="401">401</option>
+                <option value="403">403</option>
+                <option value="404">404</option>
+                <option value="409">409</option>
+                <option value="500">500</option>
+              </select>
+            </label>
+          </div>
+          <p className="muted">
+            Use validation, role restrictions, missing records and simulated failures to exercise
+            400, 401, 403, 404, 409 and 500 paths.
+          </p>
+        </div>
+      ) : null}
 
       <div className="panel filters-panel" data-testid="products-filters">
         <div className="toolbar-grid">
           <label className="field">
             Search
             <input
-              value={query.search ?? ''}
-              onChange={(event) =>
-                setQuery((current) => ({ ...current, page: 1, search: event.target.value }))
-              }
+              value={searchValue}
+              onChange={(event) => {
+                setSearchValue(event.target.value);
+                setQuery((current) => ({ ...current, page: 1 }));
+              }}
               placeholder="Search by name, SKU or barcode"
               data-testid="products-search-input"
             />
+            <span className="muted">Search waits briefly before hitting the server.</span>
           </label>
           <label className="field">
             Status
             <select
-              value={query.status ?? ''}
+              value={query.status}
               onChange={(event) =>
                 setQuery((current) => ({
                   ...current,
@@ -164,7 +222,7 @@ export function ProductsPage() {
           <label className="field">
             Active state
             <select
-              value={query.isActive ?? ''}
+              value={query.isActive}
               onChange={(event) =>
                 setQuery((current) => ({
                   ...current,
@@ -182,7 +240,7 @@ export function ProductsPage() {
           <label className="field">
             Category
             <select
-              value={query.categoryId ?? ''}
+              value={query.categoryId}
               onChange={(event) =>
                 setQuery((current) => ({ ...current, page: 1, categoryId: event.target.value }))
               }
@@ -199,7 +257,7 @@ export function ProductsPage() {
           <label className="field">
             Supplier
             <select
-              value={query.supplierId ?? ''}
+              value={query.supplierId}
               onChange={(event) =>
                 setQuery((current) => ({ ...current, page: 1, supplierId: event.target.value }))
               }
@@ -219,8 +277,8 @@ export function ProductsPage() {
               value={`${query.sortBy}-${query.sortOrder}`}
               onChange={(event) => {
                 const [sortBy, sortOrder] = event.target.value.split('-') as [
-                  NonNullable<ProductListQuery['sortBy']>,
-                  NonNullable<ProductListQuery['sortOrder']>,
+                  ProductListState['sortBy'],
+                  ProductListState['sortOrder'],
                 ];
                 setQuery((current) => ({ ...current, sortBy, sortOrder }));
               }}
@@ -242,18 +300,15 @@ export function ProductsPage() {
                 key={tag.id}
                 type="button"
                 className={isSelected ? 'chip chip-active' : 'chip'}
-                onClick={() => {
-                  setQuery((current) => {
-                    const currentTagIds = current.tagIds ?? [];
-                    return {
-                      ...current,
-                      page: 1,
-                      tagIds: currentTagIds.includes(tag.id)
-                        ? currentTagIds.filter((item) => item !== tag.id)
-                        : [...currentTagIds, tag.id],
-                    };
-                  });
-                }}
+                onClick={() =>
+                  setQuery((current) => ({
+                    ...current,
+                    page: 1,
+                    tagIds: current.tagIds.includes(tag.id)
+                      ? current.tagIds.filter((item) => item !== tag.id)
+                      : [...current.tagIds, tag.id],
+                  }))
+                }
                 data-testid={`products-tag-filter-${tag.id}`}
               >
                 {tag.name}
@@ -263,80 +318,80 @@ export function ProductsPage() {
         </div>
       </div>
 
+      {productsQuery.isFetching ? (
+        <div className="panel fetching-banner" data-testid="products-fetching-banner">
+          Updating results from the server...
+        </div>
+      ) : null}
+
       {products.length === 0 ? (
         <EmptyState
           title="No products match the current filters"
           description="Adjust the search and filters or create a new product to populate this workspace."
           testId="products-empty"
           action={
-            <Link className="primary-button button-link" to="/products/new">
-              Create first product
-            </Link>
+            user?.permissions.canManageProducts ? (
+              <Link className="primary-button button-link" to="/products/new">
+                Create first product
+              </Link>
+            ) : undefined
           }
         />
       ) : (
-        <div className="products-grid" data-testid="products-list">
-          {products.map((product) => (
-            <article
-              key={product.id}
-              className="panel product-card"
-              data-testid={`product-card-${product.id}`}
-            >
-              <div className="product-card-header">
-                <div>
-                  <p className="eyebrow">{product.category.name}</p>
-                  <h3>{product.name}</h3>
-                </div>
-                <span
-                  className={product.isActive ? 'status-chip' : 'status-chip status-chip-muted'}
-                >
-                  {product.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-              <p className="muted">{product.shortDescription}</p>
-              <dl className="inline-metrics">
-                <div>
-                  <dt>SKU</dt>
-                  <dd>{product.sku}</dd>
-                </div>
-                <div>
-                  <dt>Price</dt>
-                  <dd>${product.price}</dd>
-                </div>
-                <div>
-                  <dt>Stock</dt>
-                  <dd>{product.stockQuantity}</dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>{product.status}</dd>
-                </div>
-              </dl>
-              <div className="tag-row">
-                {product.tags.map((tag) => (
-                  <span key={tag.id} className="tag-badge">
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-              <div className="action-row">
-                <Link className="ghost-button button-link" to={`/products/${product.id}`}>
-                  Details
-                </Link>
-                <Link className="ghost-button button-link" to={`/products/${product.id}/edit`}>
-                  Edit
-                </Link>
-                <button
-                  type="button"
-                  className="danger-button"
-                  onClick={() => setProductToDelete(product)}
-                  data-testid={`delete-product-button-${product.id}`}
-                >
-                  Delete
-                </button>
-              </div>
-            </article>
-          ))}
+        <div className="panel table-panel" data-testid="products-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Supplier</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id} data-testid={`product-row-${product.id}`}>
+                  <td>
+                    <strong>{product.name}</strong>
+                    <div className="muted">{product.shortDescription}</div>
+                  </td>
+                  <td>{product.sku}</td>
+                  <td>{product.status}</td>
+                  <td>R$ {product.price}</td>
+                  <td>{product.stockQuantity}</td>
+                  <td>{product.supplier.name}</td>
+                  <td>
+                    <div className="action-row">
+                      <Link className="ghost-button button-link" to={`/products/${product.id}`}>
+                        Details
+                      </Link>
+                      {user?.permissions.canManageProducts ? (
+                        <>
+                          <Link
+                            className="ghost-button button-link"
+                            to={`/products/${product.id}/edit`}
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            onClick={() => setProductToDelete(product)}
+                            data-testid={`delete-product-button-${product.id}`}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -353,10 +408,10 @@ export function ProductsPage() {
               onClick={() =>
                 setQuery((current) => ({
                   ...current,
-                  page: Math.max(1, (current.page ?? 1) - 1),
+                  page: Math.max(1, current.page - 1),
                 }))
               }
-              disabled={(query.page ?? 1) <= 1}
+              disabled={query.page <= 1}
             >
               Previous
             </button>
@@ -367,7 +422,7 @@ export function ProductsPage() {
               onClick={() =>
                 setQuery((current) => ({
                   ...current,
-                  page: Math.min(meta.totalPages, (current.page ?? 1) + 1),
+                  page: Math.min(meta.totalPages, current.page + 1),
                 }))
               }
               disabled={meta.page >= meta.totalPages}
@@ -381,7 +436,7 @@ export function ProductsPage() {
       <ConfirmModal
         isOpen={Boolean(productToDelete)}
         title="Delete product"
-        description={`This will permanently delete ${productToDelete?.name ?? 'this product'}. This action is intentional and requires confirmation.`}
+        description={`This will permanently delete ${productToDelete?.name ?? 'this product'}. This action requires confirmation.`}
         confirmLabel="Delete product"
         isBusy={deleteMutation.isPending}
         onCancel={() => setProductToDelete(null)}
