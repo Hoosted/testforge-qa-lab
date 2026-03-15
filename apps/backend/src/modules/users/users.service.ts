@@ -1,0 +1,95 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import type { ListUsersQueryDto } from './dto/list-users-query.dto';
+import type { UpdateUserDto } from './dto/update-user.dto';
+
+@Injectable()
+export class UsersService {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async listUsers(query: ListUsersQueryDto) {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 10;
+    const skip = (page - 1) * pageSize;
+    const where: Prisma.UserWhereInput = {
+      ...(query.search
+        ? {
+            OR: [
+              { name: { contains: query.search, mode: 'insensitive' } },
+              { email: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+      ...(query.role ? { role: query.role } : {}),
+      ...(query.status ? { status: query.status } : {}),
+    };
+
+    const [items, total] = await Promise.all([
+      this.prismaService.user.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          lastLoginAt: true,
+          createdAt: true,
+        },
+      }),
+      this.prismaService.user.count({ where }),
+    ]);
+
+    return {
+      items: items.map((item) => ({
+        ...item,
+        lastLoginAt: item.lastLoginAt?.toISOString() ?? null,
+        createdAt: item.createdAt.toISOString(),
+      })),
+      meta: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+      },
+    };
+  }
+
+  async updateUser(userId: string, payload: UpdateUserDto) {
+    const existingUser = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        ...(payload.role ? { role: payload.role } : {}),
+        ...(payload.status ? { status: payload.status } : {}),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        lastLoginAt: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      ...updatedUser,
+      lastLoginAt: updatedUser.lastLoginAt?.toISOString() ?? null,
+      createdAt: updatedUser.createdAt.toISOString(),
+    };
+  }
+}
