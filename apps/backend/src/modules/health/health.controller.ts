@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { healthcheck, type Healthcheck } from '@testforge/shared-types';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { HealthResponseDto } from './dto/health-response.dto';
+import { HealthService } from './health.service';
 
 @ApiTags('health')
 @Controller({
@@ -8,14 +9,15 @@ import { healthcheck, type Healthcheck } from '@testforge/shared-types';
   version: '1',
 })
 export class HealthController {
+  constructor(private readonly healthService: HealthService) {}
+
   @Get()
+  @ApiOperation({ summary: 'Checks API and database health' })
   @ApiOkResponse({
-    description: 'Returns the API bootstrap health status.',
+    description: 'Returns the API and database health status.',
+    type: HealthResponseDto,
   })
-  getHealth(): Healthcheck {
-    return {
-      ...healthcheck,
-      timestamp: new Date().toISOString(),
-    };
+  getHealth() {
+    return this.healthService.getStatus();
   }
 }
