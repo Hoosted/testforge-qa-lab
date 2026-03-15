@@ -24,6 +24,22 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum AuditEntityType {
+  PRODUCT
+  CATEGORY
+  SUPPLIER
+  USER
+}
+
+enum AuditAction {
+  CREATED
+  UPDATED
+  DELETED
+  PROFILE_UPDATED
+  STATUS_CHANGED
+  ROLE_CHANGED
+}
+
 model User {
   id              String           @id @default(cuid())
   name            String
@@ -35,6 +51,7 @@ model User {
   refreshSessions RefreshSession[]
   createdProducts Product[]        @relation("ProductCreatedBy")
   updatedProducts Product[]        @relation("ProductUpdatedBy")
+  auditLogs       AuditLog[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -82,39 +99,39 @@ model Tag {
 }
 
 model Product {
-  id                String         @id @default(cuid())
-  name              String
-  sku               String         @unique
-  shortDescription  String
-  longDescription   String
-  price             Decimal        @db.Decimal(10, 2)
-  promotionalPrice  Decimal?       @db.Decimal(10, 2)
-  promotionEndsAt   DateTime?
-  cost              Decimal        @db.Decimal(10, 2)
-  stockQuantity     Int            @default(0)
-  categoryId        String
-  supplierId        String
-  status            ProductStatus  @default(DRAFT)
-  isActive          Boolean        @default(true)
+  id                 String         @id @default(cuid())
+  name               String
+  sku                String         @unique
+  shortDescription   String
+  longDescription    String
+  price              Decimal        @db.Decimal(10, 2)
+  promotionalPrice   Decimal?       @db.Decimal(10, 2)
+  promotionEndsAt    DateTime?
+  cost               Decimal        @db.Decimal(10, 2)
+  stockQuantity      Int            @default(0)
+  categoryId         String
+  supplierId         String
+  status             ProductStatus  @default(DRAFT)
+  isActive           Boolean        @default(true)
   deactivationReason String?
-  weight            Decimal        @db.Decimal(10, 2)
-  width             Decimal        @db.Decimal(10, 2)
-  height            Decimal        @db.Decimal(10, 2)
-  length            Decimal        @db.Decimal(10, 2)
-  barcode           String?        @unique
-  expirationDate    DateTime?
-  featureBullets    String[]       @default([])
-  relatedSkus       String[]       @default([])
-  imageUrl          String?
-  createdById       String
-  lastUpdatedById   String
-  category          Category       @relation(fields: [categoryId], references: [id])
-  supplier          Supplier       @relation(fields: [supplierId], references: [id])
-  createdBy         User           @relation("ProductCreatedBy", fields: [createdById], references: [id])
-  lastUpdatedBy     User           @relation("ProductUpdatedBy", fields: [lastUpdatedById], references: [id])
-  productTags       ProductTag[]
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  weight             Decimal        @db.Decimal(10, 2)
+  width              Decimal        @db.Decimal(10, 2)
+  height             Decimal        @db.Decimal(10, 2)
+  length             Decimal        @db.Decimal(10, 2)
+  barcode            String?        @unique
+  expirationDate     DateTime?
+  featureBullets     String[]       @default([])
+  relatedSkus        String[]       @default([])
+  imageUrl           String?
+  createdById        String
+  lastUpdatedById    String
+  category           Category       @relation(fields: [categoryId], references: [id])
+  supplier           Supplier       @relation(fields: [supplierId], references: [id])
+  createdBy          User           @relation("ProductCreatedBy", fields: [createdById], references: [id])
+  lastUpdatedBy      User           @relation("ProductUpdatedBy", fields: [lastUpdatedById], references: [id])
+  productTags        ProductTag[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   @@index([name])
   @@index([status])
@@ -130,4 +147,21 @@ model ProductTag {
   tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([productId, tagId])
+}
+
+model AuditLog {
+  id         String          @id @default(cuid())
+  entityType AuditEntityType
+  entityId   String
+  action     AuditAction
+  summary    String
+  actorId    String?
+  actorName  String?
+  before     Json?
+  after      Json?
+  createdAt  DateTime        @default(now())
+  actor      User?           @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
 }

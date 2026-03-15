@@ -23,6 +23,9 @@ export interface AuthPermissionMap {
   canAccessAdminArea: boolean;
   canAccessOperatorArea: boolean;
   canManageProducts: boolean;
+  canManageCatalog: boolean;
+  canManageUsers: boolean;
+  canViewAuditLogs: boolean;
 }
 
 export interface AuthUser {
@@ -79,6 +82,20 @@ export interface UserListItem {
   createdAt: string;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+}
+
 export interface ListUsersQuery {
   page?: number;
   pageSize?: number;
@@ -95,6 +112,71 @@ export interface UpdateUserRequest {
 export interface ProductOption {
   id: string;
   name: string;
+}
+
+export interface CategoryRecord extends ProductOption {
+  description: string | null;
+  productCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoryPayload {
+  name: string;
+  description?: string;
+}
+
+export interface SupplierRecord extends ProductOption {
+  email: string | null;
+  phone: string | null;
+  productCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SupplierPayload {
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+export const auditEntityTypes = ['PRODUCT', 'CATEGORY', 'SUPPLIER', 'USER'] as const;
+export const auditActions = [
+  'CREATED',
+  'UPDATED',
+  'DELETED',
+  'PROFILE_UPDATED',
+  'STATUS_CHANGED',
+  'ROLE_CHANGED',
+] as const;
+
+export type AuditEntityType = (typeof auditEntityTypes)[number];
+export type AuditAction = (typeof auditActions)[number];
+
+export interface AuditLogRecord {
+  id: string;
+  entityType: AuditEntityType;
+  entityId: string;
+  action: AuditAction;
+  summary: string;
+  actor: {
+    id: string | null;
+    name: string;
+    email: string | null;
+  } | null;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface AuditLogQuery {
+  page?: number;
+  pageSize?: number;
+  entityType?: AuditEntityType | '';
+  entityId?: string;
+  action?: AuditAction | '';
+  actorId?: string;
+  search?: string;
 }
 
 export interface ProductTag {

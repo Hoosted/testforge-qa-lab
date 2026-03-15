@@ -125,8 +125,12 @@ export class ProductsController {
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiOkResponse({ type: AuthMessageResponseDto })
-  deleteProduct(@Param('id') productId: string, @Query('simulateError') simulateError?: string) {
-    return this.productsService.deleteProduct(productId, simulateError);
+  deleteProduct(
+    @Param('id') productId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+    @Query('simulateError') simulateError?: string,
+  ) {
+    return this.productsService.deleteProduct(productId, actor, simulateError);
   }
 
   @Post(':id/image')

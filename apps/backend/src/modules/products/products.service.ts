@@ -10,6 +10,7 @@ import {
 import { Prisma } from '@prisma/client';
 import type { Prisma as PrismaNamespace } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import type { AuthJwtPayload } from '../auth/auth.service';
 import type { CreateProductDto } from './dto/create-product.dto';
 import type { ListProductsQueryDto } from './dto/list-products-query.dto';
@@ -43,7 +44,10 @@ type ProductWithRelations = PrismaNamespace.ProductGetPayload<{
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
 
   async listProducts(query: ListProductsQueryDto) {
     this.maybeThrowSimulatedError(query.simulateError);
@@ -166,6 +170,15 @@ export class ProductsService {
       include: productInclude,
     });
 
+    await this.auditService.record({
+      entityType: 'PRODUCT',
+      entityId: product.id,
+      action: 'CREATED',
+      summary: `Product ${product.name} was created`,
+      actor: await this.getActor(actor.sub),
+      after: this.buildAuditSnapshot(product),
+    });
+
     return this.mapProduct(product);
   }
 
@@ -269,15 +282,36 @@ export class ProductsService {
       include: productInclude,
     });
 
+    await this.auditService.record({
+      entityType: 'PRODUCT',
+      entityId: product.id,
+      action: 'UPDATED',
+      summary: `Product ${product.name} was updated`,
+      actor: await this.getActor(actor.sub),
+      before: this.buildAuditSnapshot(existingProduct),
+      after: this.buildAuditSnapshot(product),
+    });
+
     return this.mapProduct(product);
   }
 
-  async deleteProduct(productId: string, simulateError?: string) {
+  async deleteProduct(productId: string, actor: AuthJwtPayload, simulateError?: string) {
     this.maybeThrowSimulatedError(simulateError);
 
     const existingProduct = await this.prismaService.product.findUnique({
       where: { id: productId },
-      select: { id: true },
+      select: {
+        id: true,
+        name: true,
+        sku: true,
+        status: true,
+        stockQuantity: true,
+        isActive: true,
+        categoryId: true,
+        supplierId: true,
+        featureBullets: true,
+        relatedSkus: true,
+      },
     });
 
     if (!existingProduct) {
@@ -286,6 +320,15 @@ export class ProductsService {
 
     await this.prismaService.product.delete({
       where: { id: productId },
+    });
+
+    await this.auditService.record({
+      entityType: 'PRODUCT',
+      entityId: existingProduct.id,
+      action: 'DELETED',
+      summary: `Product ${existingProduct.name} was deleted`,
+      actor: await this.getActor(actor.sub),
+      before: this.buildAuditSnapshot(existingProduct),
     });
 
     return {
@@ -303,7 +346,10 @@ export class ProductsService {
 
     const existingProduct = await this.prismaService.product.findUnique({
       where: { id: productId },
-      select: { id: true },
+      select: {
+        id: true,
+        imageUrl: true,
+      },
     });
 
     if (!existingProduct) {
@@ -321,7 +367,59 @@ export class ProductsService {
       include: productInclude,
     });
 
+    await this.auditService.record({
+      entityType: 'PRODUCT',
+      entityId: product.id,
+      action: 'UPDATED',
+      summary: `Product ${product.name} image was updated`,
+      actor: await this.getActor(actor.sub),
+      before: {
+        imageUrl: existingProduct.imageUrl,
+      } as Prisma.InputJsonValue,
+      after: {
+        imageUrl,
+      } as Prisma.InputJsonValue,
+    });
+
     return this.mapProduct(product);
+  }
+
+  private async getActor(userId: string) {
+    return this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
+
+  private buildAuditSnapshot(product: {
+    id: string;
+    name: string;
+    sku: string;
+    status?: string;
+    stockQuantity?: number;
+    isActive?: boolean;
+    categoryId?: string;
+    supplierId?: string;
+    productTags?: Array<{ tagId: string }>;
+    featureBullets?: string[];
+    relatedSkus?: string[];
+  }) {
+    return {
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      status: product.status ?? null,
+      stockQuantity: product.stockQuantity ?? null,
+      isActive: product.isActive ?? null,
+      categoryId: product.categoryId ?? null,
+      supplierId: product.supplierId ?? null,
+      tagIds: product.productTags?.map((item) => item.tagId) ?? [],
+      featureBullets: product.featureBullets ?? [],
+      relatedSkus: product.relatedSkus ?? [],
+    } as Prisma.InputJsonValue;
   }
 
   async getMetadata(simulateError?: string) {

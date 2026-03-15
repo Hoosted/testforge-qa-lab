@@ -10,6 +10,12 @@ CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INVITED', 'DISABLED');
 -- CreateEnum
 CREATE TYPE "ProductStatus" AS ENUM ('DRAFT', 'READY', 'ARCHIVED');
 
+-- CreateEnum
+CREATE TYPE "AuditEntityType" AS ENUM ('PRODUCT', 'CATEGORY', 'SUPPLIER', 'USER');
+
+-- CreateEnum
+CREATE TYPE "AuditAction" AS ENUM ('CREATED', 'UPDATED', 'DELETED', 'PROFILE_UPDATED', 'STATUS_CHANGED', 'ROLE_CHANGED');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -114,6 +120,22 @@ CREATE TABLE "ProductTag" (
     CONSTRAINT "ProductTag_pkey" PRIMARY KEY ("productId","tagId")
 );
 
+-- CreateTable
+CREATE TABLE "AuditLog" (
+    "id" TEXT NOT NULL,
+    "entityType" "AuditEntityType" NOT NULL,
+    "entityId" TEXT NOT NULL,
+    "action" "AuditAction" NOT NULL,
+    "summary" TEXT NOT NULL,
+    "actorId" TEXT,
+    "actorName" TEXT,
+    "before" JSONB,
+    "after" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -153,6 +175,12 @@ CREATE INDEX "Product_categoryId_idx" ON "Product"("categoryId");
 -- CreateIndex
 CREATE INDEX "Product_supplierId_idx" ON "Product"("supplierId");
 
+-- CreateIndex
+CREATE INDEX "AuditLog_entityType_entityId_createdAt_idx" ON "AuditLog"("entityType", "entityId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "AuditLog_actorId_createdAt_idx" ON "AuditLog"("actorId", "createdAt");
+
 -- AddForeignKey
 ALTER TABLE "RefreshSession" ADD CONSTRAINT "RefreshSession_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -173,3 +201,6 @@ ALTER TABLE "ProductTag" ADD CONSTRAINT "ProductTag_productId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "ProductTag" ADD CONSTRAINT "ProductTag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "Tag"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_actorId_fkey" FOREIGN KEY ("actorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -148,6 +148,15 @@ async function main() {
     });
   }
 
+  const headphonesProduct = await prisma.product.findUnique({
+    where: { sku: 'TF-HEADPHONE-001' },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+    },
+  });
+
   const existingFoodProduct = await prisma.product.findUnique({
     where: { sku: 'TF-SNACK-002' },
     select: { id: true },
@@ -188,6 +197,60 @@ async function main() {
           create: [{ tagId: tagSeasonal.id }],
         },
       },
+    });
+  }
+
+  const snackProduct = await prisma.product.findUnique({
+    where: { sku: 'TF-SNACK-002' },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+    },
+  });
+
+  await prisma.auditLog.deleteMany({
+    where: {
+      entityType: 'PRODUCT',
+      entityId: {
+        in: [headphonesProduct?.id, snackProduct?.id].filter(Boolean) as string[],
+      },
+    },
+  });
+
+  if (headphonesProduct && snackProduct) {
+    await prisma.auditLog.createMany({
+      data: [
+        {
+          entityType: 'PRODUCT',
+          entityId: headphonesProduct.id,
+          action: 'CREATED',
+          summary: `Product ${headphonesProduct.name} was seeded`,
+          actorId: adminUser.id,
+          actorName: 'TestForge Admin',
+          after: {
+            sku: headphonesProduct.sku,
+            source: 'seed',
+          },
+        },
+        {
+          entityType: 'PRODUCT',
+          entityId: snackProduct.id,
+          action: 'UPDATED',
+          summary: `Product ${snackProduct.name} inventory was reviewed`,
+          actorId: operatorUser.id,
+          actorName: 'TestForge Operator',
+          before: {
+            sku: snackProduct.sku,
+            stockQuantity: 120,
+          },
+          after: {
+            sku: snackProduct.sku,
+            stockQuantity: 120,
+            source: 'seed',
+          },
+        },
+      ],
     });
   }
 }
