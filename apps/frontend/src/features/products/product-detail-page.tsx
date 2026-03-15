@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { ErrorState, LoadingState } from '@/components/state-blocks';
 import { useAuth } from '@/features/auth/auth-context';
+import { listAuditLogs } from '@/features/audit/audit-api';
 import { getProduct, type AuthorizedRequest } from '@/features/products/products-api';
 
 export function ProductDetailPage() {
@@ -10,6 +11,17 @@ export function ProductDetailPage() {
   const productQuery = useQuery({
     queryKey: ['products', productId, 'detail'],
     queryFn: () => getProduct(fetchWithAuth as AuthorizedRequest, productId ?? ''),
+    enabled: Boolean(productId),
+  });
+  const auditQuery = useQuery({
+    queryKey: ['audit-logs', 'product-detail', productId],
+    queryFn: () =>
+      listAuditLogs(fetchWithAuth as AuthorizedRequest, {
+        page: 1,
+        pageSize: 6,
+        entityType: 'PRODUCT',
+        ...(productId ? { entityId: productId } : {}),
+      }),
     enabled: Boolean(productId),
   });
 
@@ -146,6 +158,29 @@ export function ProductDetailPage() {
               : 'No related products configured.'}
           </p>
         </div>
+      </div>
+
+      <div className="panel detail-list-block" data-testid="product-audit-history">
+        <p className="eyebrow">History</p>
+        <h3>Important changes for this product</h3>
+        {auditQuery.isLoading ? <p className="muted">Loading audit trail...</p> : null}
+        {auditQuery.data?.items.length ? (
+          <div className="audit-list compact-audit-list">
+            {auditQuery.data.items.map((item) => (
+              <article key={item.id} className="audit-item">
+                <div className="audit-item-header">
+                  <strong>{item.summary}</strong>
+                  <span className="muted">{new Date(item.createdAt).toLocaleString()}</span>
+                </div>
+                <p className="muted">
+                  {item.action} by {item.actor?.name ?? 'System'}
+                </p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">No recorded changes yet for this product.</p>
+        )}
       </div>
     </section>
   );

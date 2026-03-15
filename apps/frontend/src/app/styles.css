@@ -543,7 +543,8 @@ code {
 .repeatable-stack,
 .search-results,
 .summary-grid,
-.skeleton-grid {
+.skeleton-grid,
+.audit-list {
   display: grid;
   gap: 16px;
 }
@@ -670,6 +671,24 @@ code {
 .detail-list-block ul {
   margin: 0;
   padding-left: 20px;
+}
+
+.audit-item {
+  border: 1px solid rgba(16, 33, 52, 0.08);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.audit-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.compact-audit-list {
+  gap: 12px;
 }
 
 @keyframes pulse-slide {

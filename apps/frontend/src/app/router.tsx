@@ -1,15 +1,19 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from '@/app/shell';
+import { AuditPage } from '@/features/audit/audit-page';
 import { AdminPage } from '@/features/auth/admin-page';
 import { DashboardPage } from '@/features/auth/dashboard-page';
 import { LoginPage } from '@/features/auth/login-page';
 import { OperatorPage } from '@/features/auth/operator-page';
+import { AdminCategoriesPage } from '@/features/catalog/admin-categories-page';
+import { AdminSuppliersPage } from '@/features/catalog/admin-suppliers-page';
 import { ProtectedRoute } from '@/features/auth/components/protected-route';
 import { RoleRoute } from '@/features/auth/components/role-route';
 import { ProductDetailPage } from '@/features/products/product-detail-page';
 import { ProductFormPage } from '@/features/products/product-form-page';
 import { ProductsPage } from '@/features/products/products-page';
 import { AdminUsersPage } from '@/features/users/admin-users-page';
+import { ProfilePage } from '@/features/users/profile-page';
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +30,10 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <DashboardPage />,
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />,
           },
           {
             path: 'products',
@@ -62,6 +70,18 @@ export const router = createBrowserRouter([
               {
                 path: 'admin/users',
                 element: <AdminUsersPage />,
+              },
+              {
+                path: 'admin/categories',
+                element: <AdminCategoriesPage />,
+              },
+              {
+                path: 'admin/suppliers',
+                element: <AdminSuppliersPage />,
+              },
+              {
+                path: 'admin/audit',
+                element: <AuditPage />,
               },
             ],
           },

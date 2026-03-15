@@ -29,8 +29,17 @@ export function AdminPage() {
         </p>
       ) : null}
       <div className="action-row">
+        <Link className="ghost-button button-link" to="/admin/categories">
+          Manage categories
+        </Link>
+        <Link className="ghost-button button-link" to="/admin/suppliers">
+          Manage suppliers
+        </Link>
         <Link className="ghost-button button-link" to="/admin/users">
           Manage users
+        </Link>
+        <Link className="ghost-button button-link" to="/admin/audit">
+          Review audit logs
         </Link>
       </div>
     </section>
