@@ -1,4 +1,4 @@
-# TestForge
+# TestForge QA
 
 A modern full-stack product management platform designed as a real-world playground for test automation practice and portfolio projects.
 
