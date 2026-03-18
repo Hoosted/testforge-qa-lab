@@ -4,6 +4,7 @@ import type { UpdateProfileRequest, UserProfile } from '@testforge/shared-types'
 import { ErrorState, LoadingState } from '@/components/state-blocks';
 import { useAuth } from '@/features/auth/auth-context';
 import { useToast } from '@/features/ui/toast-context';
+import { formatDateTime, formatRoleLabel, formatUserStatus } from '@/lib/labels';
 
 export function ProfilePage() {
   const { fetchWithAuth } = useAuth();
@@ -24,15 +25,15 @@ export function ProfilePage() {
     onSuccess: (payload) => {
       setName(payload.name);
       pushToast({
-        title: 'Profile updated',
-        description: 'Your personal details were saved successfully.',
+        title: 'Perfil atualizado',
+        description: 'Seus dados foram salvos com sucesso.',
       });
       void profileQuery.refetch();
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to update profile',
-        description: error instanceof Error ? error.message : 'Try again in a moment.',
+        title: 'Nao foi possivel atualizar o perfil',
+        description: error instanceof Error ? error.message : 'Tente novamente em instantes.',
         variant: 'error',
       });
     },
@@ -41,8 +42,8 @@ export function ProfilePage() {
   if (profileQuery.isLoading) {
     return (
       <LoadingState
-        title="Loading your profile"
-        description="Fetching the latest session profile details."
+        title="Carregando seu perfil"
+        description="Buscando os dados mais recentes da sua conta."
         testId="profile-loading"
       />
     );
@@ -51,8 +52,8 @@ export function ProfilePage() {
   if (profileQuery.isError || !profileQuery.data) {
     return (
       <ErrorState
-        title="Unable to load profile"
-        description="Your account details are not available right now."
+        title="Nao foi possivel carregar o perfil"
+        description="Os dados da sua conta nao estao disponiveis no momento."
         testId="profile-error"
         action={
           <button
@@ -60,7 +61,7 @@ export function ProfilePage() {
             className="primary-button"
             onClick={() => void profileQuery.refetch()}
           >
-            Retry
+            Tentar novamente
           </button>
         }
       />
@@ -74,30 +75,31 @@ export function ProfilePage() {
     <section className="dashboard-grid" data-testid="profile-page">
       <div className="panel section-header">
         <div>
-          <p className="eyebrow">Profile</p>
-          <h2>Keep your account details current</h2>
+          <p className="eyebrow">Meu perfil</p>
+          <h2>Mantenha seus dados de acesso sempre atualizados</h2>
           <p className="muted">
-            This screen supports authenticated profile assertions and updates.
+            Esta tela ajuda a validar leitura autenticada, alteracao de perfil e feedback visual de
+            sucesso ou erro.
           </p>
         </div>
       </div>
 
       <div className="panel detail-grid" data-testid="profile-summary">
         <div>
-          <dt>Email</dt>
+          <dt>E-mail</dt>
           <dd>{profile.email}</dd>
         </div>
         <div>
-          <dt>Role</dt>
-          <dd>{profile.role}</dd>
+          <dt>Perfil</dt>
+          <dd>{formatRoleLabel(profile.role)}</dd>
         </div>
         <div>
           <dt>Status</dt>
-          <dd>{profile.status}</dd>
+          <dd>{formatUserStatus(profile.status)}</dd>
         </div>
         <div>
-          <dt>Last login</dt>
-          <dd>{profile.lastLoginAt ? new Date(profile.lastLoginAt).toLocaleString() : 'Never'}</dd>
+          <dt>Ultimo acesso</dt>
+          <dd>{formatDateTime(profile.lastLoginAt)}</dd>
         </div>
       </div>
 
@@ -110,7 +112,7 @@ export function ProfilePage() {
         }}
       >
         <label className="field">
-          Display name
+          Nome de exibicao
           <input
             value={effectiveName}
             onChange={(event) => setName(event.target.value)}
@@ -124,7 +126,7 @@ export function ProfilePage() {
             disabled={updateMutation.isPending}
             data-testid="profile-save-button"
           >
-            {updateMutation.isPending ? 'Saving...' : 'Save profile'}
+            {updateMutation.isPending ? 'Salvando...' : 'Salvar alteracoes'}
           </button>
         </div>
       </form>

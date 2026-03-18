@@ -12,15 +12,16 @@ export function AdminPage() {
 
   return (
     <section className="panel protected-panel" data-testid="admin-page">
-      <p className="eyebrow">Admin route</p>
-      <h2>Protected admin workflow</h2>
+      <p className="eyebrow">Central administrativa</p>
+      <h2>Governanca, cadastros e historico em um unico painel</h2>
       <p className="muted">
-        This overview proves the admin token path and links to restricted management screens.
+        Esta visao comprova o acesso administrativo e organiza os atalhos para as areas restritas da
+        plataforma.
       </p>
-      {adminQuery.isLoading ? <p className="muted">Checking admin access...</p> : null}
+      {adminQuery.isLoading ? <p className="muted">Validando acesso de administrador...</p> : null}
       {adminQuery.isError ? (
         <p className="form-alert" data-testid="admin-error">
-          Unable to validate admin access right now.
+          Nao foi possivel validar o acesso administrativo agora.
         </p>
       ) : null}
       {adminQuery.data ? (
@@ -30,16 +31,16 @@ export function AdminPage() {
       ) : null}
       <div className="action-row">
         <Link className="ghost-button button-link" to="/admin/categories">
-          Manage categories
+          Gerenciar categorias
         </Link>
         <Link className="ghost-button button-link" to="/admin/suppliers">
-          Manage suppliers
+          Gerenciar fornecedores
         </Link>
         <Link className="ghost-button button-link" to="/admin/users">
-          Manage users
+          Gerenciar usuarios
         </Link>
         <Link className="ghost-button button-link" to="/admin/audit">
-          Review audit logs
+          Ver auditoria
         </Link>
       </div>
     </section>

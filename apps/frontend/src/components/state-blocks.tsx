@@ -10,7 +10,7 @@ interface StateBlockProps {
 export function LoadingState({ title, description, testId }: StateBlockProps) {
   return (
     <section className="panel state-panel" data-testid={testId}>
-      <p className="eyebrow">Loading</p>
+      <p className="eyebrow">Carregando</p>
       <h2>{title}</h2>
       <p className="muted">{description}</p>
     </section>
@@ -20,7 +20,7 @@ export function LoadingState({ title, description, testId }: StateBlockProps) {
 export function ErrorState({ title, description, action, testId }: StateBlockProps) {
   return (
     <section className="panel state-panel" data-testid={testId}>
-      <p className="eyebrow">Error</p>
+      <p className="eyebrow">Algo saiu do esperado</p>
       <h2>{title}</h2>
       <p className="form-alert">{description}</p>
       {action}
@@ -31,7 +31,7 @@ export function ErrorState({ title, description, action, testId }: StateBlockPro
 export function EmptyState({ title, description, action, testId }: StateBlockProps) {
   return (
     <section className="panel state-panel" data-testid={testId}>
-      <p className="eyebrow">Empty state</p>
+      <p className="eyebrow">Nada por aqui ainda</p>
       <h2>{title}</h2>
       <p className="muted">{description}</p>
       {action}
@@ -42,7 +42,7 @@ export function EmptyState({ title, description, action, testId }: StateBlockPro
 export function SkeletonPanel({ rows = 4, testId }: { rows?: number; testId: string }) {
   return (
     <section className="panel state-panel" data-testid={testId}>
-      <p className="eyebrow">Loading</p>
+      <p className="eyebrow">Carregando</p>
       <div className="skeleton-grid">
         {Array.from({ length: rows }).map((_, index) => (
           <span key={index} className="skeleton-line" />

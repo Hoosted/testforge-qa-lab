@@ -1,9 +1,10 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ListUsersQuery, UpdateUserRequest, UserListItem } from '@testforge/shared-types';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-blocks';
 import { useAuth } from '@/features/auth/auth-context';
 import { useToast } from '@/features/ui/toast-context';
+import { formatDateTime, formatRoleLabel, formatUserStatus } from '@/lib/labels';
 
 function buildUsersQuery(query: ListUsersQuery) {
   const params = new URLSearchParams();
@@ -51,13 +52,17 @@ export function AdminUsersPage() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      pushToast({ title: 'User updated', description: 'Role and status changes were saved.' });
+      pushToast({
+        title: 'Usuario atualizado',
+        description: 'As alteracoes foram salvas com sucesso.',
+      });
       void queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to update user',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
+        title: 'Nao foi possivel atualizar o usuario',
+        description:
+          error instanceof Error ? error.message : 'Tente novamente em alguns instantes.',
         variant: 'error',
       });
     },
@@ -66,8 +71,8 @@ export function AdminUsersPage() {
   if (usersQuery.isLoading) {
     return (
       <LoadingState
-        title="Loading user management"
-        description="Fetching admin-only account management data."
+        title="Carregando gestao de usuarios"
+        description="Buscando os dados administrativos das contas cadastradas."
         testId="users-loading"
       />
     );
@@ -76,8 +81,8 @@ export function AdminUsersPage() {
   if (usersQuery.isError) {
     return (
       <ErrorState
-        title="Unable to load users"
-        description="Admin management data is currently unavailable."
+        title="Nao foi possivel carregar os usuarios"
+        description="Os dados administrativos de contas estao indisponiveis no momento."
         testId="users-error"
         action={
           <button
@@ -85,7 +90,7 @@ export function AdminUsersPage() {
             className="primary-button"
             onClick={() => void usersQuery.refetch()}
           >
-            Retry
+            Tentar novamente
           </button>
         }
       />
@@ -102,10 +107,10 @@ export function AdminUsersPage() {
     <section className="dashboard-grid" data-testid="users-management-page">
       <div className="panel section-header">
         <div>
-          <p className="eyebrow">Admin users</p>
-          <h2>Restrict account governance to admins only</h2>
+          <p className="eyebrow">Usuarios</p>
+          <h2>Controle perfis, status e governanca de acesso</h2>
           <p className="muted">
-            This screen exercises role-based access control and predictable test data.
+            Esta tela facilita a validacao de RBAC, estados de conta e alteracoes administrativas.
           </p>
         </div>
       </div>
@@ -113,7 +118,7 @@ export function AdminUsersPage() {
       <div className="panel filters-panel" data-testid="users-filters">
         <div className="toolbar-grid compact-grid">
           <label className="field">
-            Search
+            Buscar
             <input
               value={query.search ?? ''}
               onChange={(event) =>
@@ -123,7 +128,7 @@ export function AdminUsersPage() {
             />
           </label>
           <label className="field">
-            Role
+            Perfil
             <select
               value={query.role ?? ''}
               onChange={(event) =>
@@ -135,9 +140,9 @@ export function AdminUsersPage() {
               }
               data-testid="users-role-filter"
             >
-              <option value="">All</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="OPERATOR">OPERATOR</option>
+              <option value="">Todos</option>
+              <option value="ADMIN">Administrador</option>
+              <option value="OPERATOR">Operador</option>
             </select>
           </label>
           <label className="field">
@@ -153,10 +158,10 @@ export function AdminUsersPage() {
               }
               data-testid="users-status-filter"
             >
-              <option value="">All</option>
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INVITED">INVITED</option>
-              <option value="DISABLED">DISABLED</option>
+              <option value="">Todos</option>
+              <option value="ACTIVE">Ativo</option>
+              <option value="INVITED">Convidado</option>
+              <option value="DISABLED">Desativado</option>
             </select>
           </label>
         </div>
@@ -164,8 +169,8 @@ export function AdminUsersPage() {
 
       {data.items.length === 0 ? (
         <EmptyState
-          title="No users found"
-          description="Try a broader search or clear the current admin filters."
+          title="Nenhum usuario encontrado"
+          description="Tente ampliar a busca ou limpar os filtros aplicados."
           testId="users-empty"
         />
       ) : (
@@ -173,12 +178,12 @@ export function AdminUsersPage() {
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
                 <th>Status</th>
-                <th>Last login</th>
-                <th>Actions</th>
+                <th>Ultimo acesso</th>
+                <th>Acoes</th>
               </tr>
             </thead>
             <tbody>
@@ -197,7 +202,7 @@ export function AdminUsersPage() {
 
       <div className="panel pagination-panel">
         <div>
-          <strong>{data.meta.total}</strong> users
+          <strong>{data.meta.total}</strong> usuarios cadastrados
         </div>
         <div className="action-row">
           <button
@@ -208,9 +213,9 @@ export function AdminUsersPage() {
             }
             disabled={(query.page ?? 1) <= 1}
           >
-            Previous
+            Anterior
           </button>
-          <span data-testid="users-current-page">Page {data.meta.page}</span>
+          <span data-testid="users-current-page">Pagina {data.meta.page}</span>
           <button
             type="button"
             className="ghost-button"
@@ -222,7 +227,7 @@ export function AdminUsersPage() {
             }
             disabled={data.meta.page >= data.meta.totalPages}
           >
-            Next
+            Proxima
           </button>
         </div>
       </div>
@@ -251,8 +256,8 @@ function UserRow({
           value={role}
           onChange={(event) => setRole(event.target.value as UserListItem['role'])}
         >
-          <option value="ADMIN">ADMIN</option>
-          <option value="OPERATOR">OPERATOR</option>
+          <option value="ADMIN">Administrador</option>
+          <option value="OPERATOR">Operador</option>
         </select>
       </td>
       <td>
@@ -260,22 +265,27 @@ function UserRow({
           value={status}
           onChange={(event) => setStatus(event.target.value as UserListItem['status'])}
         >
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="INVITED">INVITED</option>
-          <option value="DISABLED">DISABLED</option>
+          <option value="ACTIVE">Ativo</option>
+          <option value="INVITED">Convidado</option>
+          <option value="DISABLED">Desativado</option>
         </select>
       </td>
-      <td>{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}</td>
+      <td>{formatDateTime(user.lastLoginAt)}</td>
       <td>
-        <button
-          type="button"
-          className="ghost-button"
-          onClick={() => onSave({ role, status })}
-          disabled={isSaving}
-          data-testid={`save-user-button-${user.id}`}
-        >
-          Save
-        </button>
+        <div className="section-stack">
+          <span className="muted">
+            {formatRoleLabel(user.role)} · {formatUserStatus(user.status)}
+          </span>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={() => onSave({ role, status })}
+            disabled={isSaving}
+            data-testid={`save-user-button-${user.id}`}
+          >
+            Salvar
+          </button>
+        </div>
       </td>
     </tr>
   );

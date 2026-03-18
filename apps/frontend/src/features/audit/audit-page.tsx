@@ -5,6 +5,7 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/state-blocks'
 import { useAuth } from '@/features/auth/auth-context';
 import { listAuditLogs } from '@/features/audit/audit-api';
 import { type AuthorizedRequest } from '@/features/products/products-api';
+import { formatAuditAction, formatAuditEntity, formatDateTime } from '@/lib/labels';
 
 export function AuditPage() {
   const { fetchWithAuth } = useAuth();
@@ -31,8 +32,8 @@ export function AuditPage() {
   if (auditQuery.isLoading) {
     return (
       <LoadingState
-        title="Loading audit history"
-        description="Collecting the latest trace of important domain changes."
+        title="Carregando historico de auditoria"
+        description="Reunindo os registros mais recentes das alteracoes importantes do sistema."
         testId="audit-loading"
       />
     );
@@ -41,8 +42,8 @@ export function AuditPage() {
   if (auditQuery.isError) {
     return (
       <ErrorState
-        title="Unable to load audit history"
-        description="The system audit timeline is currently unavailable."
+        title="Nao foi possivel carregar a auditoria"
+        description="A linha do tempo do sistema esta indisponivel no momento."
         testId="audit-error"
         action={
           <button
@@ -50,7 +51,7 @@ export function AuditPage() {
             className="primary-button"
             onClick={() => void auditQuery.refetch()}
           >
-            Retry
+            Tentar novamente
           </button>
         }
       />
@@ -63,10 +64,11 @@ export function AuditPage() {
     <section className="dashboard-grid" data-testid="audit-page">
       <div className="panel section-header">
         <div>
-          <p className="eyebrow">Audit</p>
-          <h2>Review the important changes across the platform</h2>
+          <p className="eyebrow">Auditoria</p>
+          <h2>Acompanhe as principais mudancas da plataforma</h2>
           <p className="muted">
-            Use this page for access control, traceability and history assertions.
+            Use esta pagina para validar rastreabilidade, acessos administrativos e historico de
+            alteracoes.
           </p>
         </div>
       </div>
@@ -74,7 +76,7 @@ export function AuditPage() {
       <div className="panel filters-panel" data-testid="audit-filters">
         <div className="toolbar-grid compact-grid">
           <label className="field">
-            Search
+            Buscar
             <input
               value={filters.search}
               onChange={(event) =>
@@ -84,7 +86,7 @@ export function AuditPage() {
             />
           </label>
           <label className="field">
-            Entity
+            Entidade
             <select
               value={filters.entityType}
               onChange={(event) =>
@@ -95,15 +97,15 @@ export function AuditPage() {
               }
               data-testid="audit-entity-filter"
             >
-              <option value="">All</option>
-              <option value="PRODUCT">PRODUCT</option>
-              <option value="CATEGORY">CATEGORY</option>
-              <option value="SUPPLIER">SUPPLIER</option>
-              <option value="USER">USER</option>
+              <option value="">Todas</option>
+              <option value="PRODUCT">Produto</option>
+              <option value="CATEGORY">Categoria</option>
+              <option value="SUPPLIER">Fornecedor</option>
+              <option value="USER">Usuario</option>
             </select>
           </label>
           <label className="field">
-            Action
+            Acao
             <select
               value={filters.action}
               onChange={(event) =>
@@ -114,13 +116,13 @@ export function AuditPage() {
               }
               data-testid="audit-action-filter"
             >
-              <option value="">All</option>
-              <option value="CREATED">CREATED</option>
-              <option value="UPDATED">UPDATED</option>
-              <option value="DELETED">DELETED</option>
-              <option value="PROFILE_UPDATED">PROFILE_UPDATED</option>
-              <option value="STATUS_CHANGED">STATUS_CHANGED</option>
-              <option value="ROLE_CHANGED">ROLE_CHANGED</option>
+              <option value="">Todas</option>
+              <option value="CREATED">Criacao</option>
+              <option value="UPDATED">Atualizacao</option>
+              <option value="DELETED">Exclusao</option>
+              <option value="PROFILE_UPDATED">Perfil atualizado</option>
+              <option value="STATUS_CHANGED">Status alterado</option>
+              <option value="ROLE_CHANGED">Perfil alterado</option>
             </select>
           </label>
         </div>
@@ -128,8 +130,8 @@ export function AuditPage() {
 
       {!data || data.items.length === 0 ? (
         <EmptyState
-          title="No audit entries found"
-          description="Try broadening the filters to inspect more system activity."
+          title="Nenhum registro de auditoria encontrado"
+          description="Amplie os filtros para visualizar mais atividades do sistema."
           testId="audit-empty"
         />
       ) : (
@@ -140,16 +142,16 @@ export function AuditPage() {
                 <div>
                   <strong>{item.summary}</strong>
                   <p className="muted">
-                    {item.entityType} · {item.action}
+                    {formatAuditEntity(item.entityType)} · {formatAuditAction(item.action)}
                   </p>
                 </div>
-                <div className="muted">{new Date(item.createdAt).toLocaleString()}</div>
+                <div className="muted">{formatDateTime(item.createdAt)}</div>
               </div>
               <p className="muted">
-                Actor:{' '}
+                Responsavel:{' '}
                 {item.actor
                   ? `${item.actor.name}${item.actor.email ? ` (${item.actor.email})` : ''}`
-                  : 'System'}
+                  : 'Sistema'}
               </p>
             </article>
           ))}

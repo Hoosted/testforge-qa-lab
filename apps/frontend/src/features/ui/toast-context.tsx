@@ -1,4 +1,4 @@
-﻿import {
+import {
   createContext,
   useCallback,
   useContext,
@@ -6,6 +6,7 @@
   useState,
   type PropsWithChildren,
 } from 'react';
+import { X } from 'lucide-react';
 
 interface ToastItem {
   id: string;
@@ -77,9 +78,9 @@ export function ToastProvider({ children }: PropsWithChildren) {
               type="button"
               className="toast-close"
               onClick={() => dismissToast(toast.id)}
-              aria-label="Dismiss notification"
+              aria-label="Fechar notificacao"
             >
-              x
+              <X size={16} />
             </button>
           </article>
         ))}

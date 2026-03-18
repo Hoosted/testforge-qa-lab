@@ -4,6 +4,7 @@ import { ErrorState, LoadingState } from '@/components/state-blocks';
 import { useAuth } from '@/features/auth/auth-context';
 import { listAuditLogs } from '@/features/audit/audit-api';
 import { getProduct, type AuthorizedRequest } from '@/features/products/products-api';
+import { formatCurrency, formatDateTime, formatProductStatus } from '@/lib/labels';
 
 export function ProductDetailPage() {
   const { productId } = useParams();
@@ -28,8 +29,8 @@ export function ProductDetailPage() {
   if (productQuery.isLoading) {
     return (
       <LoadingState
-        title="Loading product details"
-        description="We are collecting the latest state for this product."
+        title="Carregando detalhes do produto"
+        description="Estamos reunindo as informacoes mais recentes deste item."
         testId="product-detail-loading"
       />
     );
@@ -38,12 +39,12 @@ export function ProductDetailPage() {
   if (productQuery.isError || !productQuery.data) {
     return (
       <ErrorState
-        title="Product unavailable"
-        description="The selected product could not be loaded."
+        title="Produto indisponivel"
+        description="Nao foi possivel carregar o produto selecionado."
         testId="product-detail-error"
         action={
           <Link className="primary-button button-link" to="/products">
-            Back to products
+            Voltar para produtos
           </Link>
         }
       />
@@ -62,11 +63,11 @@ export function ProductDetailPage() {
         </div>
         <div className="action-row">
           <Link className="ghost-button button-link" to="/products">
-            Back
+            Voltar
           </Link>
           {user?.permissions.canManageProducts ? (
             <Link className="primary-button button-link" to={`/products/${product.id}/edit`}>
-              Edit product
+              Editar produto
             </Link>
           ) : null}
         </div>
@@ -77,7 +78,7 @@ export function ProductDetailPage() {
           {product.imageUrl ? (
             <img src={`http://localhost:3001${product.imageUrl}`} alt={product.name} />
           ) : (
-            <div className="image-placeholder">No image uploaded</div>
+            <div className="image-placeholder">Nenhuma imagem enviada</div>
           )}
         </div>
         <dl className="detail-grid">
@@ -86,56 +87,60 @@ export function ProductDetailPage() {
             <dd>{product.sku}</dd>
           </div>
           <div>
-            <dt>Regular price</dt>
-            <dd>${product.price}</dd>
+            <dt>Preco regular</dt>
+            <dd>{formatCurrency(product.price)}</dd>
           </div>
           <div>
-            <dt>Promotional price</dt>
-            <dd>{product.promotionalPrice ? `$${product.promotionalPrice}` : 'Not configured'}</dd>
+            <dt>Preco promocional</dt>
+            <dd>
+              {product.promotionalPrice
+                ? formatCurrency(product.promotionalPrice)
+                : 'Nao configurado'}
+            </dd>
           </div>
           <div>
-            <dt>Cost</dt>
-            <dd>${product.cost}</dd>
+            <dt>Custo</dt>
+            <dd>{formatCurrency(product.cost)}</dd>
           </div>
           <div>
-            <dt>Stock</dt>
+            <dt>Estoque</dt>
             <dd>{product.stockQuantity}</dd>
           </div>
           <div>
             <dt>Status</dt>
-            <dd>{product.status}</dd>
+            <dd>{formatProductStatus(product.status)}</dd>
           </div>
           <div>
-            <dt>Supplier</dt>
+            <dt>Fornecedor</dt>
             <dd>{product.supplier.name}</dd>
           </div>
           <div>
-            <dt>Barcode</dt>
-            <dd>{product.barcode ?? 'Not configured'}</dd>
+            <dt>Codigo de barras</dt>
+            <dd>{product.barcode ?? 'Nao configurado'}</dd>
           </div>
           <div>
-            <dt>Weight</dt>
+            <dt>Peso</dt>
             <dd>{product.weight} kg</dd>
           </div>
           <div>
-            <dt>Dimensions</dt>
+            <dt>Dimensoes</dt>
             <dd>
               {product.width} x {product.height} x {product.length}
             </dd>
           </div>
           <div>
-            <dt>Created by</dt>
+            <dt>Criado por</dt>
             <dd>{product.createdBy.name}</dd>
           </div>
           <div>
-            <dt>Last updated by</dt>
+            <dt>Ultima atualizacao</dt>
             <dd>{product.lastUpdatedBy.name}</dd>
           </div>
         </dl>
       </div>
 
       <div className="panel">
-        <p className="eyebrow">Description</p>
+        <p className="eyebrow">Descricao completa</p>
         <p className="muted">{product.longDescription}</p>
         <div className="tag-row" data-testid="product-detail-tags">
           {product.tags.map((tag) => (
@@ -145,41 +150,41 @@ export function ProductDetailPage() {
           ))}
         </div>
         <div className="detail-list-block">
-          <h3>Feature bullets</h3>
+          <h3>Diferenciais do produto</h3>
           <ul>
             {product.featureBullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
-          <h3>Related SKUs</h3>
+          <h3>SKUs relacionados</h3>
           <p className="muted">
             {product.relatedSkus.length > 0
               ? product.relatedSkus.join(', ')
-              : 'No related products configured.'}
+              : 'Nenhum produto relacionado foi configurado.'}
           </p>
         </div>
       </div>
 
       <div className="panel detail-list-block" data-testid="product-audit-history">
-        <p className="eyebrow">History</p>
-        <h3>Important changes for this product</h3>
-        {auditQuery.isLoading ? <p className="muted">Loading audit trail...</p> : null}
+        <p className="eyebrow">Historico</p>
+        <h3>Ultimas alteracoes deste produto</h3>
+        {auditQuery.isLoading ? <p className="muted">Carregando trilha de auditoria...</p> : null}
         {auditQuery.data?.items.length ? (
           <div className="audit-list compact-audit-list">
             {auditQuery.data.items.map((item) => (
               <article key={item.id} className="audit-item">
                 <div className="audit-item-header">
                   <strong>{item.summary}</strong>
-                  <span className="muted">{new Date(item.createdAt).toLocaleString()}</span>
+                  <span className="muted">{formatDateTime(item.createdAt)}</span>
                 </div>
                 <p className="muted">
-                  {item.action} by {item.actor?.name ?? 'System'}
+                  {item.action} por {item.actor?.name ?? 'Sistema'}
                 </p>
               </article>
             ))}
           </div>
         ) : (
-          <p className="muted">No recorded changes yet for this product.</p>
+          <p className="muted">Ainda nao existem mudancas registradas para este produto.</p>
         )}
       </div>
     </section>

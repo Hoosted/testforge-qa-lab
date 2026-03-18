@@ -8,9 +8,9 @@ export function ProtectedRoute() {
   if (isBootstrapping) {
     return (
       <div className="panel auth-state" data-testid="auth-loading-state">
-        <p className="eyebrow">Authenticating</p>
-        <h2>Restoring your session...</h2>
-        <p className="muted">Please wait while TestForge checks your current session.</p>
+        <p className="eyebrow">Restaurando sessao</p>
+        <h2>Estamos confirmando seu acesso...</h2>
+        <p className="muted">Aguarde um instante enquanto a plataforma valida sua autenticacao.</p>
       </div>
     );
   }

@@ -12,6 +12,7 @@ import {
 } from '@/features/catalog/catalog-api';
 import { type AuthorizedRequest } from '@/features/products/products-api';
 import { useToast } from '@/features/ui/toast-context';
+import { formatDateTime } from '@/lib/labels';
 
 const emptySupplierForm: SupplierPayload = {
   name: '',
@@ -45,8 +46,8 @@ export function AdminSuppliersPage() {
         : createSupplier(fetchWithAuth as AuthorizedRequest, payload),
     onSuccess: () => {
       pushToast({
-        title: editingSupplier ? 'Supplier updated' : 'Supplier created',
-        description: 'Supplier data is now available to the product workflow.',
+        title: editingSupplier ? 'Fornecedor atualizado' : 'Fornecedor criado',
+        description: 'Os dados do fornecedor ja estao disponiveis para o fluxo de produtos.',
       });
       setForm(emptySupplierForm);
       setEditingSupplier(null);
@@ -55,8 +56,9 @@ export function AdminSuppliersPage() {
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to save supplier',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
+        title: 'Nao foi possivel salvar o fornecedor',
+        description:
+          error instanceof Error ? error.message : 'Tente novamente em alguns instantes.',
         variant: 'error',
       });
     },
@@ -66,15 +68,16 @@ export function AdminSuppliersPage() {
     mutationFn: (supplierId: string) =>
       deleteSupplier(fetchWithAuth as AuthorizedRequest, supplierId),
     onSuccess: (payload) => {
-      pushToast({ title: 'Supplier deleted', description: payload.message });
+      pushToast({ title: 'Fornecedor removido', description: payload.message });
       setSupplierToDelete(null);
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       void queryClient.invalidateQueries({ queryKey: ['products', 'metadata'] });
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to delete supplier',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
+        title: 'Nao foi possivel excluir o fornecedor',
+        description:
+          error instanceof Error ? error.message : 'Tente novamente em alguns instantes.',
         variant: 'error',
       });
     },
@@ -83,8 +86,8 @@ export function AdminSuppliersPage() {
   if (suppliersQuery.isLoading) {
     return (
       <LoadingState
-        title="Loading suppliers"
-        description="Preparing the supplier catalog for product operations."
+        title="Carregando fornecedores"
+        description="Preparando o cadastro de parceiros ligados aos produtos."
         testId="suppliers-loading"
       />
     );
@@ -93,8 +96,8 @@ export function AdminSuppliersPage() {
   if (suppliersQuery.isError) {
     return (
       <ErrorState
-        title="Unable to load suppliers"
-        description="The supplier administration workspace is currently unavailable."
+        title="Nao foi possivel carregar os fornecedores"
+        description="A area administrativa de fornecedores esta indisponivel no momento."
         testId="suppliers-error"
         action={
           <button
@@ -102,7 +105,7 @@ export function AdminSuppliersPage() {
             className="primary-button"
             onClick={() => void suppliersQuery.refetch()}
           >
-            Retry
+            Tentar novamente
           </button>
         }
       />
@@ -113,10 +116,10 @@ export function AdminSuppliersPage() {
     <section className="dashboard-grid" data-testid="suppliers-page">
       <div className="panel section-header">
         <div>
-          <p className="eyebrow">Catalog</p>
-          <h2>Manage suppliers</h2>
+          <p className="eyebrow">Catalogo</p>
+          <h2>Gerencie os fornecedores</h2>
           <p className="muted">
-            Supplier records stay connected to product sourcing and filtering.
+            Os fornecedores conectam origem, contato e abastecimento aos produtos cadastrados.
           </p>
         </div>
       </div>
@@ -131,7 +134,7 @@ export function AdminSuppliersPage() {
       >
         <div className="toolbar-grid compact-grid">
           <label className="field">
-            Name
+            Nome
             <input
               value={form.name}
               onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -139,7 +142,7 @@ export function AdminSuppliersPage() {
             />
           </label>
           <label className="field">
-            Email
+            E-mail
             <input
               value={form.email ?? ''}
               onChange={(event) =>
@@ -149,7 +152,7 @@ export function AdminSuppliersPage() {
             />
           </label>
           <label className="field">
-            Phone
+            Telefone
             <input
               value={form.phone ?? ''}
               onChange={(event) =>
@@ -167,10 +170,10 @@ export function AdminSuppliersPage() {
             data-testid="supplier-save-button"
           >
             {saveMutation.isPending
-              ? 'Saving...'
+              ? 'Salvando...'
               : editingSupplier
-                ? 'Save changes'
-                : 'Create supplier'}
+                ? 'Salvar alteracoes'
+                : 'Criar fornecedor'}
           </button>
           {editingSupplier ? (
             <button
@@ -181,7 +184,7 @@ export function AdminSuppliersPage() {
                 setForm(emptySupplierForm);
               }}
             >
-              Cancel edit
+              Cancelar edicao
             </button>
           ) : null}
         </div>
@@ -189,8 +192,8 @@ export function AdminSuppliersPage() {
 
       {sortedSuppliers.length === 0 ? (
         <EmptyState
-          title="No suppliers registered"
-          description="Create the first supplier to support product sourcing."
+          title="Nenhum fornecedor cadastrado"
+          description="Cadastre o primeiro fornecedor para enriquecer o fluxo de abastecimento."
           testId="suppliers-empty"
         />
       ) : (
@@ -198,11 +201,11 @@ export function AdminSuppliersPage() {
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Products</th>
-                <th>Updated</th>
-                <th>Actions</th>
+                <th>Nome</th>
+                <th>Contato</th>
+                <th>Produtos</th>
+                <th>Atualizado em</th>
+                <th>Acoes</th>
               </tr>
             </thead>
             <tbody>
@@ -210,11 +213,11 @@ export function AdminSuppliersPage() {
                 <tr key={supplier.id} data-testid={`supplier-row-${supplier.id}`}>
                   <td>{supplier.name}</td>
                   <td>
-                    <strong>{supplier.email ?? 'No email'}</strong>
-                    <div className="muted">{supplier.phone ?? 'No phone'}</div>
+                    <strong>{supplier.email ?? 'Sem e-mail'}</strong>
+                    <div className="muted">{supplier.phone ?? 'Sem telefone'}</div>
                   </td>
                   <td>{supplier.productCount}</td>
-                  <td>{new Date(supplier.updatedAt).toLocaleString()}</td>
+                  <td>{formatDateTime(supplier.updatedAt)}</td>
                   <td>
                     <div className="action-row">
                       <button
@@ -230,7 +233,7 @@ export function AdminSuppliersPage() {
                         }}
                         data-testid={`edit-supplier-button-${supplier.id}`}
                       >
-                        Edit
+                        Editar
                       </button>
                       <button
                         type="button"
@@ -238,7 +241,7 @@ export function AdminSuppliersPage() {
                         onClick={() => setSupplierToDelete(supplier)}
                         data-testid={`delete-supplier-button-${supplier.id}`}
                       >
-                        Delete
+                        Excluir
                       </button>
                     </div>
                   </td>
@@ -251,9 +254,9 @@ export function AdminSuppliersPage() {
 
       <ConfirmModal
         isOpen={Boolean(supplierToDelete)}
-        title="Delete supplier"
-        description={`Delete ${supplierToDelete?.name ?? 'this supplier'} from the catalog?`}
-        confirmLabel="Delete supplier"
+        title="Excluir fornecedor"
+        description={`Deseja realmente remover ${supplierToDelete?.name ?? 'este fornecedor'} do catalogo?`}
+        confirmLabel="Excluir fornecedor"
         isBusy={deleteMutation.isPending}
         onCancel={() => setSupplierToDelete(null)}
         onConfirm={() => {
@@ -262,7 +265,9 @@ export function AdminSuppliersPage() {
           }
         }}
       >
-        <p className="muted">Products linked to this supplier must be reassigned first.</p>
+        <p className="muted">
+          Produtos vinculados a este fornecedor precisam ser reassociados antes.
+        </p>
       </ConfirmModal>
     </section>
   );

@@ -1,30 +1,30 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
 import { isCurrencyValueValid } from '@/lib/currency';
 
 export const productFormSchema = z
   .object({
-    name: z.string().min(2, 'Provide a product name.'),
-    sku: z.string().min(3, 'Provide a unique SKU.'),
-    shortDescription: z.string().min(5, 'Provide a short description.').max(180),
-    longDescription: z.string().min(10, 'Provide a long description.'),
-    price: z.string().refine(isCurrencyValueValid, 'Use a valid price.'),
+    name: z.string().min(2, 'Informe o nome do produto.'),
+    sku: z.string().min(3, 'Informe um SKU unico.'),
+    shortDescription: z.string().min(5, 'Informe uma descricao curta.').max(180),
+    longDescription: z.string().min(10, 'Informe uma descricao completa.'),
+    price: z.string().refine(isCurrencyValueValid, 'Use um preco valido.'),
     promotionalPrice: z.string(),
     promotionEndsAt: z.string(),
-    cost: z.string().refine(isCurrencyValueValid, 'Use a valid cost.'),
-    stockQuantity: z.number().int().min(0, 'Stock cannot be negative.'),
-    categoryId: z.string().min(1, 'Select a category.'),
-    supplierId: z.string().min(1, 'Select a supplier.'),
+    cost: z.string().refine(isCurrencyValueValid, 'Use um custo valido.'),
+    stockQuantity: z.number().int().min(0, 'O estoque nao pode ser negativo.'),
+    categoryId: z.string().min(1, 'Selecione uma categoria.'),
+    supplierId: z.string().min(1, 'Selecione um fornecedor.'),
     status: z.enum(['DRAFT', 'READY', 'ARCHIVED']),
     isActive: z.boolean(),
     deactivationReason: z.string(),
-    weight: z.string().min(1, 'Use a valid weight.'),
-    width: z.string().min(1, 'Use a valid width.'),
-    height: z.string().min(1, 'Use a valid height.'),
-    length: z.string().min(1, 'Use a valid length.'),
+    weight: z.string().min(1, 'Informe um peso valido.'),
+    width: z.string().min(1, 'Informe uma largura valida.'),
+    height: z.string().min(1, 'Informe uma altura valida.'),
+    length: z.string().min(1, 'Informe um comprimento valido.'),
     tagIds: z.array(z.string()),
     barcode: z.string(),
     expirationDate: z.string(),
-    featureBullets: z.array(z.string().min(3, 'Each bullet must have at least 3 characters.')),
+    featureBullets: z.array(z.string().min(3, 'Cada destaque precisa ter ao menos 3 caracteres.')),
     relatedSkus: z.array(z.string()),
   })
   .superRefine((value, ctx) => {
@@ -32,7 +32,7 @@ export const productFormSchema = z
       if (!isCurrencyValueValid(value.promotionalPrice)) {
         ctx.addIssue({
           code: 'custom',
-          message: 'Use a valid promotional price.',
+          message: 'Use um preco promocional valido.',
           path: ['promotionalPrice'],
         });
       }
@@ -40,7 +40,7 @@ export const productFormSchema = z
       if (!value.promotionEndsAt) {
         ctx.addIssue({
           code: 'custom',
-          message: 'Provide an end date for the promotion.',
+          message: 'Informe a data final da promocao.',
           path: ['promotionEndsAt'],
         });
       }
@@ -49,7 +49,7 @@ export const productFormSchema = z
     if (!value.isActive && !value.deactivationReason.trim()) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Provide a reason when the product is inactive.',
+        message: 'Explique o motivo da inativacao do produto.',
         path: ['deactivationReason'],
       });
     }
@@ -57,7 +57,7 @@ export const productFormSchema = z
     if (value.status === 'READY' && !value.barcode.trim()) {
       ctx.addIssue({
         code: 'custom',
-        message: 'READY products must include a barcode.',
+        message: 'Produtos prontos precisam ter codigo de barras.',
         path: ['barcode'],
       });
     }
@@ -65,7 +65,7 @@ export const productFormSchema = z
     if (value.status === 'READY' && value.featureBullets.length === 0) {
       ctx.addIssue({
         code: 'custom',
-        message: 'READY products need at least one feature bullet.',
+        message: 'Produtos prontos precisam ter pelo menos um destaque.',
         path: ['featureBullets'],
       });
     }

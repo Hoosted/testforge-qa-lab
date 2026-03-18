@@ -11,12 +11,15 @@ export function OperatorPage() {
 
   return (
     <section className="panel protected-panel" data-testid="operator-page">
-      <p className="eyebrow">Operator route</p>
-      <h2>Protected operator workflow</h2>
-      {operatorQuery.isLoading ? <p className="muted">Checking operator access...</p> : null}
+      <p className="eyebrow">Area operacional</p>
+      <h2>Fluxo protegido para validar acessos intermediarios</h2>
+      <p className="muted">
+        Ideal para testar contas com permissoes parciais sem misturar a experiencia administrativa.
+      </p>
+      {operatorQuery.isLoading ? <p className="muted">Validando acesso operacional...</p> : null}
       {operatorQuery.isError ? (
         <p className="form-alert" data-testid="operator-error">
-          Unable to validate operator access right now.
+          Nao foi possivel confirmar o acesso operacional neste momento.
         </p>
       ) : null}
       {operatorQuery.data ? (

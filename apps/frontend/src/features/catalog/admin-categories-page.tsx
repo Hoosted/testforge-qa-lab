@@ -12,6 +12,7 @@ import {
 } from '@/features/catalog/catalog-api';
 import { type AuthorizedRequest } from '@/features/products/products-api';
 import { useToast } from '@/features/ui/toast-context';
+import { formatDateTime } from '@/lib/labels';
 
 const emptyCategoryForm: CategoryPayload = {
   name: '',
@@ -44,8 +45,8 @@ export function AdminCategoriesPage() {
         : createCategory(fetchWithAuth as AuthorizedRequest, payload),
     onSuccess: () => {
       pushToast({
-        title: editingCategory ? 'Category updated' : 'Category created',
-        description: 'The product catalog taxonomy is now up to date.',
+        title: editingCategory ? 'Categoria atualizada' : 'Categoria criada',
+        description: 'A organizacao do catalogo foi atualizada com sucesso.',
       });
       setForm(emptyCategoryForm);
       setEditingCategory(null);
@@ -54,8 +55,9 @@ export function AdminCategoriesPage() {
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to save category',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
+        title: 'Nao foi possivel salvar a categoria',
+        description:
+          error instanceof Error ? error.message : 'Tente novamente em alguns instantes.',
         variant: 'error',
       });
     },
@@ -65,15 +67,16 @@ export function AdminCategoriesPage() {
     mutationFn: (categoryId: string) =>
       deleteCategory(fetchWithAuth as AuthorizedRequest, categoryId),
     onSuccess: (payload) => {
-      pushToast({ title: 'Category deleted', description: payload.message });
+      pushToast({ title: 'Categoria removida', description: payload.message });
       setCategoryToDelete(null);
       void queryClient.invalidateQueries({ queryKey: ['categories'] });
       void queryClient.invalidateQueries({ queryKey: ['products', 'metadata'] });
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to delete category',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
+        title: 'Nao foi possivel excluir a categoria',
+        description:
+          error instanceof Error ? error.message : 'Tente novamente em alguns instantes.',
         variant: 'error',
       });
     },
@@ -82,8 +85,8 @@ export function AdminCategoriesPage() {
   if (categoriesQuery.isLoading) {
     return (
       <LoadingState
-        title="Loading categories"
-        description="Preparing the catalog structure used across the product module."
+        title="Carregando categorias"
+        description="Preparando a estrutura que organiza os produtos em todo o sistema."
         testId="categories-loading"
       />
     );
@@ -92,8 +95,8 @@ export function AdminCategoriesPage() {
   if (categoriesQuery.isError) {
     return (
       <ErrorState
-        title="Unable to load categories"
-        description="The category administration workspace is currently unavailable."
+        title="Nao foi possivel carregar as categorias"
+        description="A area administrativa de categorias esta indisponivel no momento."
         testId="categories-error"
         action={
           <button
@@ -101,7 +104,7 @@ export function AdminCategoriesPage() {
             className="primary-button"
             onClick={() => void categoriesQuery.refetch()}
           >
-            Retry
+            Tentar novamente
           </button>
         }
       />
@@ -112,9 +115,11 @@ export function AdminCategoriesPage() {
     <section className="dashboard-grid" data-testid="categories-page">
       <div className="panel section-header">
         <div>
-          <p className="eyebrow">Catalog</p>
-          <h2>Manage product categories</h2>
-          <p className="muted">Categories feed the product wizard and inventory filters.</p>
+          <p className="eyebrow">Catalogo</p>
+          <h2>Gerencie as categorias de produtos</h2>
+          <p className="muted">
+            As categorias alimentam o cadastro de produtos e os filtros do inventario.
+          </p>
         </div>
       </div>
 
@@ -128,7 +133,7 @@ export function AdminCategoriesPage() {
       >
         <div className="toolbar-grid compact-grid">
           <label className="field">
-            Name
+            Nome
             <input
               value={form.name}
               onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -136,7 +141,7 @@ export function AdminCategoriesPage() {
             />
           </label>
           <label className="field full-span">
-            Description
+            Descricao
             <textarea
               value={form.description ?? ''}
               onChange={(event) =>
@@ -155,10 +160,10 @@ export function AdminCategoriesPage() {
             data-testid="category-save-button"
           >
             {saveMutation.isPending
-              ? 'Saving...'
+              ? 'Salvando...'
               : editingCategory
-                ? 'Save changes'
-                : 'Create category'}
+                ? 'Salvar alteracoes'
+                : 'Criar categoria'}
           </button>
           {editingCategory ? (
             <button
@@ -169,7 +174,7 @@ export function AdminCategoriesPage() {
                 setForm(emptyCategoryForm);
               }}
             >
-              Cancel edit
+              Cancelar edicao
             </button>
           ) : null}
         </div>
@@ -177,8 +182,8 @@ export function AdminCategoriesPage() {
 
       {sortedCategories.length === 0 ? (
         <EmptyState
-          title="No categories registered"
-          description="Create the first category to support product organization."
+          title="Nenhuma categoria cadastrada"
+          description="Crie a primeira categoria para organizar o catalogo de produtos."
           testId="categories-empty"
         />
       ) : (
@@ -186,20 +191,20 @@ export function AdminCategoriesPage() {
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Products</th>
-                <th>Updated</th>
-                <th>Actions</th>
+                <th>Nome</th>
+                <th>Descricao</th>
+                <th>Produtos</th>
+                <th>Atualizada em</th>
+                <th>Acoes</th>
               </tr>
             </thead>
             <tbody>
               {sortedCategories.map((category) => (
                 <tr key={category.id} data-testid={`category-row-${category.id}`}>
                   <td>{category.name}</td>
-                  <td>{category.description ?? 'No description'}</td>
+                  <td>{category.description ?? 'Sem descricao'}</td>
                   <td>{category.productCount}</td>
-                  <td>{new Date(category.updatedAt).toLocaleString()}</td>
+                  <td>{formatDateTime(category.updatedAt)}</td>
                   <td>
                     <div className="action-row">
                       <button
@@ -214,7 +219,7 @@ export function AdminCategoriesPage() {
                         }}
                         data-testid={`edit-category-button-${category.id}`}
                       >
-                        Edit
+                        Editar
                       </button>
                       <button
                         type="button"
@@ -222,7 +227,7 @@ export function AdminCategoriesPage() {
                         onClick={() => setCategoryToDelete(category)}
                         data-testid={`delete-category-button-${category.id}`}
                       >
-                        Delete
+                        Excluir
                       </button>
                     </div>
                   </td>
@@ -235,9 +240,9 @@ export function AdminCategoriesPage() {
 
       <ConfirmModal
         isOpen={Boolean(categoryToDelete)}
-        title="Delete category"
-        description={`Delete ${categoryToDelete?.name ?? 'this category'} from the catalog?`}
-        confirmLabel="Delete category"
+        title="Excluir categoria"
+        description={`Deseja realmente remover ${categoryToDelete?.name ?? 'esta categoria'} do catalogo?`}
+        confirmLabel="Excluir categoria"
         isBusy={deleteMutation.isPending}
         onCancel={() => setCategoryToDelete(null)}
         onConfirm={() => {
@@ -246,7 +251,9 @@ export function AdminCategoriesPage() {
           }
         }}
       >
-        <p className="muted">Products linked to this category must be reassigned first.</p>
+        <p className="muted">
+          Produtos vinculados a esta categoria precisam ser reclassificados antes.
+        </p>
       </ConfirmModal>
     </section>
   );

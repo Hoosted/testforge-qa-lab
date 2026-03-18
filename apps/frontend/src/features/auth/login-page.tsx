@@ -1,3 +1,4 @@
+import { LogIn, ShieldCheck, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -7,8 +8,8 @@ import { ApiClientError } from '@/lib/api';
 import { useAuth } from './auth-context';
 
 const loginSchema = z.object({
-  email: z.email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must have at least 8 characters'),
+  email: z.email('Digite um e-mail valido.'),
+  password: z.string().min(8, 'A senha precisa ter pelo menos 8 caracteres.'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -44,7 +45,9 @@ export function LoginPage() {
       void navigate(redirectTo, { replace: true });
     } catch (error) {
       setServerError(
-        error instanceof ApiClientError ? error.message : 'Login failed. Please try again.',
+        error instanceof ApiClientError
+          ? error.message
+          : 'Nao foi possivel entrar agora. Tente novamente.',
       );
     }
   });
@@ -53,27 +56,40 @@ export function LoginPage() {
     <section className="auth-page" data-testid="login-page">
       <div className="panel auth-panel">
         <div className="auth-copy">
-          <p className="eyebrow">Authentication</p>
-          <h2>Sign in to access protected product operations.</h2>
+          <p className="eyebrow">Acesso seguro</p>
+          <h2>Entre para testar areas protegidas, perfis e fluxos do sistema.</h2>
           <p className="muted">
-            Use one of the seeded accounts to validate roles, session renewal and protected routing
-            flows.
+            Use as contas de exemplo para validar permissoes, renovacao de sessao e navegacao por
+            nivel de acesso sem precisar configurar nada extra.
           </p>
         </div>
 
         <div className="credential-list" data-testid="seeded-credentials">
           <div className="credential-card">
-            <span className="credential-role">Admin</span>
+            <span className="credential-role">Conta administrativa: </span>
             <code>admin@testforge.local</code>
           </div>
           <div className="credential-card">
-            <span className="credential-role">Operator</span>
+            <span className="credential-role">Conta operacional: </span>
             <code>operator@testforge.local</code>
           </div>
           <div className="credential-card">
-            <span className="credential-role">Password</span>
+            <span className="credential-role">Senha padrao: </span>
             <code>TestForge@123</code>
           </div>
+        </div>
+
+        <div className="metric-grid">
+          <article className="metric-card">
+            <ShieldCheck size={18} />
+            <strong>Login guiado</strong>
+            <p>Os campos ja vem preenchidos para acelerar seus cenarios de QA.</p>
+          </article>
+          <article className="metric-card">
+            <UserRound size={18} />
+            <strong>Perfis reais</strong>
+            <p>Alterne entre administrador e operador para validar regras de acesso.</p>
+          </article>
         </div>
 
         <form
@@ -84,11 +100,11 @@ export function LoginPage() {
           data-testid="login-form"
         >
           <label className="field">
-            <span>Email</span>
+            <span>E-mail</span>
             <input
               {...form.register('email')}
               type="email"
-              placeholder="you@example.com"
+              placeholder="voce@empresa.com.br"
               data-testid="login-email-input"
             />
             {form.formState.errors.email ? (
@@ -99,11 +115,11 @@ export function LoginPage() {
           </label>
 
           <label className="field">
-            <span>Password</span>
+            <span>Senha</span>
             <input
               {...form.register('password')}
               type="password"
-              placeholder="Enter your password"
+              placeholder="Digite sua senha"
               data-testid="login-password-input"
             />
             {form.formState.errors.password ? (
@@ -125,7 +141,8 @@ export function LoginPage() {
             disabled={form.formState.isSubmitting}
             data-testid="login-submit-button"
           >
-            {form.formState.isSubmitting ? 'Signing in...' : 'Sign in'}
+            <LogIn size={16} />
+            {form.formState.isSubmitting ? 'Entrando...' : ' Entrar na plataforma'}
           </button>
         </form>
       </div>

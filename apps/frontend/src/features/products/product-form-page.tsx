@@ -32,12 +32,13 @@ import {
   type ProductFormValues,
 } from '@/features/products/product-form-schema';
 import { useToast } from '@/features/ui/toast-context';
+import { formatProductStatus } from '@/lib/labels';
 
 const wizardSteps = [
-  { id: 'core', label: 'Core data' },
-  { id: 'pricing', label: 'Pricing' },
-  { id: 'logistics', label: 'Logistics' },
-  { id: 'automation', label: 'Automation hooks' },
+  { id: 'core', label: 'Dados principais' },
+  { id: 'pricing', label: 'Precos e status' },
+  { id: 'logistics', label: 'Estoque e logistica' },
+  { id: 'automation', label: 'Relacionamentos' },
 ] as const;
 
 type StepIndex = 0 | 1 | 2 | 3;
@@ -191,7 +192,7 @@ export function ProductFormPage() {
     if (!skuValidationQuery.data.available) {
       form.setError('sku', {
         type: 'validate',
-        message: skuValidationQuery.data.reason ?? 'SKU is already in use.',
+        message: skuValidationQuery.data.reason ?? 'Este SKU ja esta em uso.',
       });
       return;
     }
@@ -204,7 +205,6 @@ export function ProductFormPage() {
   const submitMutation = useMutation({
     mutationFn: async ({
       values,
-      simulateError,
     }: {
       values: ProductFormValues;
       simulateError?: ProductErrorMode;
@@ -212,29 +212,19 @@ export function ProductFormPage() {
       const payload = formValuesToPayload(values);
       const product =
         isEditing && productId
-          ? await updateProduct(
-              fetchWithAuth as AuthorizedRequest,
-              productId,
-              payload,
-              simulateError,
-            )
-          : await createProduct(fetchWithAuth as AuthorizedRequest, payload, simulateError);
+          ? await updateProduct(fetchWithAuth as AuthorizedRequest, productId, payload)
+          : await createProduct(fetchWithAuth as AuthorizedRequest, payload);
 
       if (selectedFile) {
-        return uploadProductImage(
-          fetchWithAuth as AuthorizedRequest,
-          product.id,
-          selectedFile,
-          simulateError,
-        );
+        return uploadProductImage(fetchWithAuth as AuthorizedRequest, product.id, selectedFile);
       }
 
       return product;
     },
     onSuccess: async (product) => {
       pushToast({
-        title: isEditing ? 'Product updated' : 'Product created',
-        description: `${product.name} is ready for automation scenarios.`,
+        title: isEditing ? 'Produto atualizado' : 'Produto criado',
+        description: `${product.name} esta pronto para novos cenarios de teste.`,
       });
       await queryClient.invalidateQueries({ queryKey: ['products'] });
       setIsSubmitConfirmOpen(false);
@@ -243,8 +233,8 @@ export function ProductFormPage() {
     },
     onError: (error) => {
       pushToast({
-        title: 'Unable to save product',
-        description: error instanceof Error ? error.message : 'Review the form and try again.',
+        title: 'Nao foi possivel salvar o produto',
+        description: error instanceof Error ? error.message : 'Revise os dados e tente novamente.',
         variant: 'error',
       });
     },
@@ -259,12 +249,12 @@ export function ProductFormPage() {
   if (metadataQuery.isError || productQuery.isError) {
     return (
       <ErrorState
-        title="Unable to open product wizard"
-        description="Required product metadata could not be loaded."
+        title="Nao foi possivel abrir o formulario de produto"
+        description="Os dados necessarios para o cadastro nao puderam ser carregados."
         testId="product-form-error"
         action={
           <Link className="primary-button button-link" to="/products">
-            Back to products
+            Voltar para produtos
           </Link>
         }
       />
@@ -305,8 +295,8 @@ export function ProductFormPage() {
     const isValid = await form.trigger();
     if (!isValid) {
       pushToast({
-        title: 'Review the wizard fields',
-        description: 'Some sections still need attention before confirmation.',
+        title: 'Revise os campos do formulario',
+        description: 'Ainda existem etapas que precisam da sua atencao.',
         variant: 'error',
       });
       return;
@@ -315,7 +305,7 @@ export function ProductFormPage() {
     if (requiresExpirationDate && !form.getValues('expirationDate')) {
       form.setError('expirationDate', {
         type: 'manual',
-        message: 'Expiration date is required for grocery products.',
+        message: 'Produtos alimenticios precisam de data de validade.',
       });
       setSelectedStep(2);
       return;
@@ -329,15 +319,15 @@ export function ProductFormPage() {
     <section className="dashboard-grid" data-testid="product-form-page">
       <div className="panel section-header">
         <div>
-          <p className="eyebrow">{isEditing ? 'Edit product' : 'Create product'}</p>
-          <h2>Advanced product wizard for automation practice</h2>
+          <p className="eyebrow">{isEditing ? 'Edicao de produto' : 'Novo produto'}</p>
+          <h2>Cadastro guiado para produtos</h2>
           <p className="muted">
-            Multi-step flow with conditional fields, async validation, repeatable items and dynamic
-            lookups.
+            Um fluxo por etapas para tornar o preenchimento mais simples, claro e preparado para
+            testes automatizados.
           </p>
         </div>
         <Link className="ghost-button button-link" to="/products">
-          Back
+          Voltar
         </Link>
       </div>
 
@@ -366,7 +356,7 @@ export function ProductFormPage() {
         {selectedStep === 0 ? (
           <div className="form-grid two-columns" data-testid="product-step-core">
             <label className="field">
-              Product name
+              Nome do produto
               <input {...form.register('name')} data-testid="product-name-input" />
               <span className="field-error">{form.formState.errors.name?.message}</span>
             </label>
@@ -376,17 +366,17 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.sku?.message}</span>
               {skuValidationQuery.isFetching ? (
                 <span className="muted" data-testid="sku-validation-loading">
-                  Validating SKU...
+                  Validando SKU...
                 </span>
               ) : null}
               {skuValidationQuery.data?.available ? (
                 <span className="success-text" data-testid="sku-validation-success">
-                  SKU is available.
+                  SKU disponivel para uso.
                 </span>
               ) : null}
             </label>
             <label className="field full-span">
-              Short description
+              Descricao curta
               <input
                 {...form.register('shortDescription')}
                 data-testid="product-short-description-input"
@@ -394,7 +384,7 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.shortDescription?.message}</span>
             </label>
             <label className="field full-span">
-              Long description
+              Descricao completa
               <textarea
                 rows={5}
                 {...form.register('longDescription')}
@@ -403,9 +393,9 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.longDescription?.message}</span>
             </label>
             <label className="field">
-              Category
+              Categoria
               <select {...form.register('categoryId')} data-testid="product-category-select">
-                <option value="">Select</option>
+                <option value="">Selecione</option>
                 {metadata?.categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -415,9 +405,9 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.categoryId?.message}</span>
             </label>
             <label className="field">
-              Supplier
+              Fornecedor
               <select {...form.register('supplierId')} data-testid="product-supplier-select">
-                <option value="">Select</option>
+                <option value="">Selecione</option>
                 {supplierOptions.map((supplier: ProductOption) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}
@@ -427,12 +417,12 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.supplierId?.message}</span>
               {watchedCategoryId ? (
                 <span className="muted" data-testid="supplier-recommendation-hint">
-                  Supplier options adapt to the selected category.
+                  As sugestoes mudam conforme a categoria selecionada.
                 </span>
               ) : null}
             </label>
             <fieldset className="tag-selector full-span" data-testid="product-tags-group">
-              <legend>Tags</legend>
+              <legend>Etiquetas</legend>
               <div className="tag-row">
                 {metadata?.tags.map((tag) => (
                   <label key={tag.id} className="tag-selector-option">
@@ -461,7 +451,7 @@ export function ProductFormPage() {
         {selectedStep === 1 ? (
           <div className="form-grid two-columns" data-testid="product-step-pricing">
             <label className="field">
-              Price
+              Preco
               <input
                 value={form.watch('price')}
                 onChange={(event) => handleCurrencyChange('price', event.target.value)}
@@ -470,7 +460,7 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.price?.message}</span>
             </label>
             <label className="field">
-              Promotional price
+              Preco promocional
               <input
                 value={form.watch('promotionalPrice')}
                 onChange={(event) => handleCurrencyChange('promotionalPrice', event.target.value)}
@@ -480,7 +470,7 @@ export function ProductFormPage() {
             </label>
             {showPromotionFields ? (
               <label className="field">
-                Promotion end date
+                Data final da promocao
                 <input
                   type="date"
                   {...form.register('promotionEndsAt')}
@@ -492,7 +482,7 @@ export function ProductFormPage() {
               </label>
             ) : null}
             <label className="field">
-              Cost
+              Custo
               <input
                 value={form.watch('cost')}
                 onChange={(event) => handleCurrencyChange('cost', event.target.value)}
@@ -505,13 +495,13 @@ export function ProductFormPage() {
               <select {...form.register('status')} data-testid="product-status-select">
                 {metadata?.statuses.map((status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {formatProductStatus(status)}
                   </option>
                 ))}
               </select>
             </label>
             <label className="field field-checkbox">
-              <span>Active product</span>
+              <span>Produto ativo</span>
               <input
                 type="checkbox"
                 {...form.register('isActive')}
@@ -520,7 +510,7 @@ export function ProductFormPage() {
             </label>
             {!watchedIsActive ? (
               <label className="field full-span">
-                Deactivation reason
+                Motivo da inativacao
                 <input
                   {...form.register('deactivationReason')}
                   data-testid="product-deactivation-reason-input"
@@ -536,7 +526,7 @@ export function ProductFormPage() {
         {selectedStep === 2 ? (
           <div className="form-grid two-columns" data-testid="product-step-logistics">
             <label className="field">
-              Stock quantity
+              Quantidade em estoque
               <input
                 type="number"
                 {...form.register('stockQuantity', { valueAsNumber: true })}
@@ -545,32 +535,32 @@ export function ProductFormPage() {
               <span className="field-error">{form.formState.errors.stockQuantity?.message}</span>
             </label>
             <label className="field">
-              Barcode
+              Codigo de barras
               <input {...form.register('barcode')} data-testid="product-barcode-input" />
               <span className="field-error">{form.formState.errors.barcode?.message}</span>
             </label>
             <label className="field">
-              Weight
+              Peso
               <input {...form.register('weight')} data-testid="product-weight-input" />
               <span className="field-error">{form.formState.errors.weight?.message}</span>
             </label>
             <label className="field">
-              Width
+              Largura
               <input {...form.register('width')} data-testid="product-width-input" />
               <span className="field-error">{form.formState.errors.width?.message}</span>
             </label>
             <label className="field">
-              Height
+              Altura
               <input {...form.register('height')} data-testid="product-height-input" />
               <span className="field-error">{form.formState.errors.height?.message}</span>
             </label>
             <label className="field">
-              Length
+              Comprimento
               <input {...form.register('length')} data-testid="product-length-input" />
               <span className="field-error">{form.formState.errors.length?.message}</span>
             </label>
             <label className="field">
-              Expiration date
+              Data de validade
               <input
                 type="date"
                 {...form.register('expirationDate')}
@@ -578,11 +568,11 @@ export function ProductFormPage() {
               />
               <span className="field-error">{form.formState.errors.expirationDate?.message}</span>
               {requiresExpirationDate ? (
-                <span className="muted">Grocery products require expiration date tracking.</span>
+                <span className="muted">Produtos alimenticios exigem controle de validade.</span>
               ) : null}
             </label>
             <label className="field">
-              Main image
+              Imagem principal
               <input
                 type="file"
                 accept="image/*"
@@ -590,7 +580,7 @@ export function ProductFormPage() {
                 data-testid="product-image-input"
               />
               <span className="muted">
-                Upload remains local for development, which is ideal for automation practice.
+                O upload permanece local no ambiente de desenvolvimento, ideal para automacoes.
               </span>
             </label>
           </div>
@@ -601,8 +591,8 @@ export function ProductFormPage() {
             <section className="panel inset-panel">
               <div className="section-header-inline">
                 <div>
-                  <p className="eyebrow">Feature bullets</p>
-                  <h3>Repeatable content rows</h3>
+                  <p className="eyebrow">Destaques do produto</p>
+                  <h3>Linhas repetiveis para argumentos de venda</h3>
                 </div>
                 <button
                   type="button"
@@ -614,7 +604,7 @@ export function ProductFormPage() {
                   }
                   data-testid="add-feature-bullet-button"
                 >
-                  Add bullet
+                  Adicionar destaque
                 </button>
               </div>
               <div className="repeatable-stack">
@@ -637,7 +627,7 @@ export function ProductFormPage() {
                       }
                       disabled={watchedFeatureBullets.length === 1}
                     >
-                      Remove
+                      Remover
                     </button>
                   </div>
                 ))}
@@ -647,16 +637,16 @@ export function ProductFormPage() {
             <section className="panel inset-panel">
               <div className="section-header-inline">
                 <div>
-                  <p className="eyebrow">Related products</p>
-                  <h3>Dynamic search with debounce</h3>
+                  <p className="eyebrow">Produtos relacionados</p>
+                  <h3>Busca dinamica para conectar SKUs</h3>
                 </div>
               </div>
               <label className="field">
-                Search related products
+                Buscar produtos relacionados
                 <input
                   value={relatedSearch}
                   onChange={(event) => setRelatedSearch(event.target.value)}
-                  placeholder="Search by SKU or name"
+                  placeholder="Pesquise por SKU ou nome"
                   data-testid="related-products-search-input"
                 />
               </label>
@@ -680,14 +670,14 @@ export function ProductFormPage() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Related SKU</th>
-                      <th>Action</th>
+                      <th>SKU relacionado</th>
+                      <th>Acao</th>
                     </tr>
                   </thead>
                   <tbody>
                     {watchedRelatedSkus.length === 0 ? (
                       <tr>
-                        <td colSpan={2}>No related products selected yet.</td>
+                        <td colSpan={2}>Nenhum produto relacionado selecionado ainda.</td>
                       </tr>
                     ) : (
                       watchedRelatedSkus.map((sku) => (
@@ -705,7 +695,7 @@ export function ProductFormPage() {
                                 )
                               }
                             >
-                              Remove
+                              Remover
                             </button>
                           </td>
                         </tr>
@@ -718,8 +708,8 @@ export function ProductFormPage() {
 
             {featureFlags.automationLab ? (
               <section className="panel inset-panel automation-lab">
-                <p className="eyebrow">Automation lab</p>
-                <h3>Built-in status code scenarios</h3>
+                <p className="eyebrow">Laboratorio de automacao</p>
+                <h3>Cenarios prontos para exercitar respostas do sistema</h3>
                 <div className="status-grid compact-status-grid">
                   {automationScenarios.map((scenario) => (
                     <article key={scenario.code} className="status-card">
@@ -740,7 +730,7 @@ export function ProductFormPage() {
             onClick={() => setSelectedStep((current) => Math.max(0, current - 1) as StepIndex)}
             disabled={selectedStep === 0}
           >
-            Previous
+            Anterior
           </button>
           {selectedStep < wizardSteps.length - 1 ? (
             <button
@@ -749,11 +739,11 @@ export function ProductFormPage() {
               onClick={() => setSelectedStep((current) => Math.min(3, current + 1) as StepIndex)}
               data-testid="wizard-next-button"
             >
-              Next section
+              Proxima etapa
             </button>
           ) : (
             <button type="submit" className="primary-button" data-testid="product-submit-button">
-              Review and confirm
+              Revisar e confirmar
             </button>
           )}
         </div>
@@ -761,10 +751,14 @@ export function ProductFormPage() {
 
       <ConfirmModal
         isOpen={isSubmitConfirmOpen}
-        title={isEditing ? 'Confirm product update' : 'Confirm product creation'}
-        description="Review the wizard summary and confirm the write operation."
+        title={isEditing ? 'Confirmar atualizacao do produto' : 'Confirmar criacao do produto'}
+        description="Revise os dados abaixo antes de concluir a gravacao."
         confirmLabel={
-          submitMutation.isPending ? 'Saving...' : isEditing ? 'Update product' : 'Create product'
+          submitMutation.isPending
+            ? 'Salvando...'
+            : isEditing
+              ? 'Atualizar produto'
+              : 'Criar produto'
         }
         isBusy={submitMutation.isPending}
         onCancel={() => {
@@ -779,7 +773,7 @@ export function ProductFormPage() {
       >
         <div className="summary-grid">
           <div>
-            <strong>Name</strong>
+            <strong>Nome</strong>
             <p>{pendingPayload?.name}</p>
           </div>
           <div>
@@ -788,12 +782,14 @@ export function ProductFormPage() {
           </div>
           <div>
             <strong>Status</strong>
-            <p>{pendingPayload?.status}</p>
+            <p>{pendingPayload?.status ? formatProductStatus(pendingPayload.status) : '-'}</p>
           </div>
           <div>
-            <strong>Related SKUs</strong>
+            <strong>SKUs relacionados</strong>
             <p>
-              {pendingPayload?.relatedSkus.length ? pendingPayload.relatedSkus.join(', ') : 'None'}
+              {pendingPayload?.relatedSkus.length
+                ? pendingPayload.relatedSkus.join(', ')
+                : 'Nenhum'}
             </p>
           </div>
         </div>
@@ -805,13 +801,16 @@ export function ProductFormPage() {
 type ProductErrorMode = '' | '400' | '401' | '403' | '404' | '409' | '500';
 
 const automationScenarios: Array<{ code: string; description: string }> = [
-  { code: '400', description: 'Try invalid wizard combinations such as READY without barcode.' },
-  { code: '401', description: 'Expire the session or clear auth cookies before submitting.' },
-  { code: '403', description: 'Log in as OPERATOR and visit an admin-only mutation route.' },
-  { code: '404', description: 'Open a non-existent product detail route.' },
-  { code: '409', description: 'Reuse an existing SKU like TF-HEADPHONE-001.' },
   {
-    code: '500',
-    description: 'Use the automation lab on the list screen to simulate server failures.',
+    code: '400',
+    description: 'Teste combinacoes invalidas, como produto pronto sem codigo de barras.',
   },
+  { code: '401', description: 'Expire a sessao ou limpe os cookies antes de enviar o formulario.' },
+  {
+    code: '403',
+    description: 'Entre como operador e tente acessar uma mutacao exclusiva de administrador.',
+  },
+  { code: '404', description: 'Abra a rota de um produto inexistente para validar o tratamento.' },
+  { code: '409', description: 'Reuse um SKU ja existente, como TF-HEADPHONE-001.' },
+  { code: '500', description: 'Use o laboratorio da listagem para simular falhas de servidor.' },
 ];

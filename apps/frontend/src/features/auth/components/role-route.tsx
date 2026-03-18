@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import type { UserRole } from '@testforge/shared-types';
 import { useAuth } from '@/features/auth/auth-context';
+import { formatRoleLabel } from '@/lib/labels';
 
 interface RoleRouteProps {
   allow: UserRole[];
@@ -16,11 +17,11 @@ export function RoleRoute({ allow }: RoleRouteProps) {
   if (!allow.includes(user.role)) {
     return (
       <section className="panel auth-state" data-testid="access-denied-state">
-        <p className="eyebrow">Access denied</p>
-        <h2>You do not have permission to open this area.</h2>
+        <p className="eyebrow">Acesso negado</p>
+        <h2>Seu perfil nao possui permissao para abrir esta area.</h2>
         <p className="muted">
-          Your current role is <strong>{user.role}</strong>. Use an account with the required
-          permissions or return to the dashboard.
+          No momento voce esta logado como <strong>{formatRoleLabel(user.role)}</strong>. Entre com
+          uma conta autorizada ou retorne ao painel principal.
         </p>
       </section>
     );

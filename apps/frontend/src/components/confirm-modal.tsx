@@ -15,8 +15,8 @@ export function ConfirmModal({
   isOpen,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel = 'Confirmar',
+  cancelLabel = 'Cancelar',
   isBusy = false,
   onCancel,
   onConfirm,
@@ -35,7 +35,7 @@ export function ConfirmModal({
         aria-labelledby="confirm-modal-title"
         data-testid="confirm-modal"
       >
-        <p className="eyebrow">Confirmation required</p>
+        <p className="eyebrow">Confirmacao necessaria</p>
         <h2 id="confirm-modal-title">{title}</h2>
         <p className="muted">{description}</p>
         {children}
@@ -50,7 +50,7 @@ export function ConfirmModal({
             disabled={isBusy}
             data-testid="confirm-modal-submit"
           >
-            {isBusy ? 'Processing...' : confirmLabel}
+            {isBusy ? 'Processando...' : confirmLabel}
           </button>
         </div>
       </div>
