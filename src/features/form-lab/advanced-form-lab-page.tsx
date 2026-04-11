@@ -30,16 +30,19 @@ const steps = [
   {
     id: 'overview',
     title: 'Contexto',
+    description: 'Defina o rollout, a plataforma e a jornada principal antes de testar erros.',
     fields: ['name', 'slug', 'platform', 'ownerTeam', 'journeyType'] as const,
   },
   {
     id: 'delivery',
     title: 'Entrega',
+    description: 'Ajuste quando o fluxo entra em producao e para onde o suporte operacional aponta.',
     fields: ['launchMode', 'scheduledAt', 'supportChannel'] as const,
   },
   {
     id: 'risk',
     title: 'Risco',
+    description: 'Consolide aprovacoes, acessibilidade, observabilidade e checkpoints repetiveis.',
     fields: [
       'riskLevel',
       'requiresApproval',
@@ -90,6 +93,7 @@ export function AdvancedFormLabPage() {
   const watchedRiskLevel = form.watch('riskLevel');
   const debouncedSlug = useDebouncedValue(watchedSlug, 300);
   const currentTone = scenarioTone[scenario];
+  const activeStepConfig = steps[activeStep];
 
   const slugValidationQuery = useQuery({
     queryKey: ['advanced-form', 'slug', debouncedSlug, scenario],
@@ -154,18 +158,18 @@ export function AdvancedFormLabPage() {
     <section className="page-shell">
       <div className="page-intro">
         <p className="eyebrow">Advanced Form Lab</p>
-        <h1>O primeiro lab completo da v1 combina wizard, auth, contrato tipado e erro previsivel.</h1>
+        <h1>O lab principal agora deixa o wizard no centro e o contexto ao redor, nao em cima dele.</h1>
         <p className="lede">
           Entre como admin para o fluxo feliz ou como operator para validar 403. Depois altere o
           cenario e force 401, 409 ou 500 sem trocar de pagina.
         </p>
       </div>
 
-      <div className="lab-hero-grid">
-        <section className="editorial-panel accent-panel">
+      <section className="context-strip">
+        <div className="context-card">
           <p className="eyebrow">{currentTone.eyebrow}</p>
           <h2>{advancedFormScenarios.find((item) => item.id === scenario)?.title}</h2>
-          <p>{currentTone.helper}</p>
+          <p className="support-copy">{currentTone.helper}</p>
           <div className="scenario-list" role="list" aria-label="Cenarios">
             {advancedFormScenarios.map((item) => (
               <button
@@ -178,9 +182,9 @@ export function AdvancedFormLabPage() {
               </button>
             ))}
           </div>
-        </section>
+        </div>
 
-        <aside className="editorial-panel">
+        <aside className="context-card">
           <p className="eyebrow">Sessao atual</p>
           {session ? (
             <div className="status-stack">
@@ -196,32 +200,11 @@ export function AdvancedFormLabPage() {
               </Link>
             </div>
           )}
-
-          {guide ? (
-            <div className="bullet-columns">
-              <div>
-                <h3>O que praticar</h3>
-                <ul>
-                  {guide.goals.map((goal) => (
-                    <li key={goal}>{goal}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3>O que provar</h3>
-                <ul>
-                  {guide.successCriteria.map((criterion) => (
-                    <li key={criterion}>{criterion}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ) : null}
         </aside>
-      </div>
+      </section>
 
       <div className="lab-workspace">
-        <section className="editorial-panel">
+        <section className="panel panel-strong">
           <div className="step-row" role="tablist" aria-label="Etapas do formulario">
             {steps.map((step, index) => (
               <button
@@ -239,18 +222,32 @@ export function AdvancedFormLabPage() {
             ))}
           </div>
 
+          <div className="step-intro">
+            <p className="eyebrow">Etapa {activeStep + 1}</p>
+            <h2>{activeStepConfig.title}</h2>
+            <p className="support-copy">{activeStepConfig.description}</p>
+          </div>
+
           <form className="form-stack" onSubmit={handleSubmit}>
             {activeStep === 0 ? (
               <div className="field-grid">
                 <label className="field">
                   Nome do rollout
-                  <input {...form.register('name')} data-testid="advanced-form-name" />
+                  <input
+                    {...form.register('name')}
+                    className="field-control"
+                    data-testid="advanced-form-name"
+                  />
                   <span className="field-error">{form.formState.errors.name?.message}</span>
                 </label>
 
                 <label className="field">
                   Slug
-                  <input {...form.register('slug')} data-testid="advanced-form-slug" />
+                  <input
+                    {...form.register('slug')}
+                    className="field-control"
+                    data-testid="advanced-form-slug"
+                  />
                   <span className="field-error">{form.formState.errors.slug?.message}</span>
                   {slugValidationQuery.isFetching ? (
                     <span className="field-hint">Validando disponibilidade...</span>
@@ -262,7 +259,7 @@ export function AdvancedFormLabPage() {
 
                 <label className="field">
                   Plataforma
-                  <select {...form.register('platform')}>
+                  <select {...form.register('platform')} className="field-control">
                     {platformOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
@@ -273,7 +270,7 @@ export function AdvancedFormLabPage() {
 
                 <label className="field">
                   Time responsavel
-                  <select {...form.register('ownerTeam')}>
+                  <select {...form.register('ownerTeam')} className="field-control">
                     {ownerTeams.map((team) => (
                       <option key={team} value={team}>
                         {team}
@@ -284,7 +281,7 @@ export function AdvancedFormLabPage() {
 
                 <label className="field field-full">
                   Jornada principal
-                  <select {...form.register('journeyType')}>
+                  <select {...form.register('journeyType')} className="field-control">
                     {journeyOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
@@ -299,7 +296,7 @@ export function AdvancedFormLabPage() {
               <div className="field-grid">
                 <label className="field">
                   Modo de lancamento
-                  <select {...form.register('launchMode')}>
+                  <select {...form.register('launchMode')} className="field-control">
                     {launchModeOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
@@ -311,14 +308,14 @@ export function AdvancedFormLabPage() {
                 {watchedLaunchMode === 'scheduled' ? (
                   <label className="field">
                     Data planejada
-                    <input type="date" {...form.register('scheduledAt')} />
+                    <input className="field-control" type="date" {...form.register('scheduledAt')} />
                     <span className="field-error">{form.formState.errors.scheduledAt?.message}</span>
                   </label>
                 ) : null}
 
                 <label className="field field-full">
                   Canal principal de suporte
-                  <select {...form.register('supportChannel')}>
+                  <select {...form.register('supportChannel')} className="field-control">
                     {supportChannels.map((channel) => (
                       <option key={channel} value={channel}>
                         {channel}
@@ -333,7 +330,7 @@ export function AdvancedFormLabPage() {
               <div className="field-grid">
                 <label className="field">
                   Nivel de risco
-                  <select {...form.register('riskLevel')}>
+                  <select {...form.register('riskLevel')} className="field-control">
                     {riskLevelOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
@@ -343,21 +340,31 @@ export function AdvancedFormLabPage() {
                 </label>
 
                 <label className="field field-toggle">
-                  <span>Requer aprovacao manual</span>
-                  <input type="checkbox" {...form.register('requiresApproval')} />
+                  <span className="toggle-copy">
+                    <strong>Requer aprovacao manual</strong>
+                    <span className="field-hint">Ative para exigir um aprovador antes do envio.</span>
+                  </span>
+                  <input className="toggle-control" type="checkbox" {...form.register('requiresApproval')} />
                 </label>
 
                 {watchedRequiresApproval ? (
                   <label className="field field-full">
                     Email do aprovador
-                    <input {...form.register('approverEmail')} />
+                    <input className="field-control" {...form.register('approverEmail')} />
                     <span className="field-error">{form.formState.errors.approverEmail?.message}</span>
                   </label>
                 ) : null}
 
                 <label className="field field-toggle">
-                  <span>Revisao de acessibilidade concluida</span>
-                  <input type="checkbox" {...form.register('accessibilityReview')} />
+                  <span className="toggle-copy">
+                    <strong>Revisao de acessibilidade concluida</strong>
+                    <span className="field-hint">Checkout sem revisao deve falhar no schema.</span>
+                  </span>
+                  <input
+                    className="toggle-control"
+                    type="checkbox"
+                    {...form.register('accessibilityReview')}
+                  />
                 </label>
                 <span className="field-error field-full">
                   {form.formState.errors.accessibilityReview?.message}
@@ -365,7 +372,7 @@ export function AdvancedFormLabPage() {
 
                 <label className="field field-full">
                   Notas de observabilidade
-                  <textarea rows={4} {...form.register('observabilityNotes')} />
+                  <textarea className="field-control" rows={4} {...form.register('observabilityNotes')} />
                   <span className="field-error">
                     {form.formState.errors.observabilityNotes?.message}
                   </span>
@@ -396,11 +403,14 @@ export function AdvancedFormLabPage() {
                       <div className="repeatable-row" key={field.id}>
                         <label className="field">
                           Nome
-                          <input {...form.register(`checkpoints.${index}.label`)} />
+                          <input
+                            className="field-control"
+                            {...form.register(`checkpoints.${index}.label`)}
+                          />
                         </label>
                         <label className="field">
                           URL
-                          <input {...form.register(`checkpoints.${index}.url`)} />
+                          <input className="field-control" {...form.register(`checkpoints.${index}.url`)} />
                         </label>
                         <button
                           className="secondary-button"
@@ -464,39 +474,67 @@ export function AdvancedFormLabPage() {
           </form>
         </section>
 
-        <aside className="editorial-panel summary-panel">
-          <p className="eyebrow">Resumo vivo</p>
-          <dl className="summary-list">
-            <div>
-              <dt>Slug</dt>
-              <dd>{form.watch('slug') || '-'}</dd>
-            </div>
-            <div>
-              <dt>Plataforma</dt>
-              <dd>{form.watch('platform')}</dd>
-            </div>
-            <div>
-              <dt>Risco</dt>
-              <dd>{form.watch('riskLevel')}</dd>
-            </div>
-            <div>
-              <dt>Aprovacao</dt>
-              <dd>{form.watch('requiresApproval') ? 'Obrigatoria' : 'Nao requerida'}</dd>
-            </div>
-            <div>
-              <dt>Checkpoints</dt>
-              <dd>{form.watch('checkpoints').length}</dd>
-            </div>
-          </dl>
+        <aside className="info-rail">
+          <section className="panel summary-panel">
+            <p className="eyebrow">Resumo vivo</p>
+            <dl className="summary-list">
+              <div>
+                <dt>Slug</dt>
+                <dd>{form.watch('slug') || '-'}</dd>
+              </div>
+              <div>
+                <dt>Plataforma</dt>
+                <dd>{form.watch('platform')}</dd>
+              </div>
+              <div>
+                <dt>Risco</dt>
+                <dd>{form.watch('riskLevel')}</dd>
+              </div>
+              <div>
+                <dt>Aprovacao</dt>
+                <dd>{form.watch('requiresApproval') ? 'Obrigatoria' : 'Nao requerida'}</dd>
+              </div>
+              <div>
+                <dt>Checkpoints</dt>
+                <dd>{form.watch('checkpoints').length}</dd>
+              </div>
+            </dl>
+          </section>
 
-          <div className="mini-contract">
-            <p className="eyebrow">Contrato observado</p>
-            <code>POST /api/labs/advanced-form/submissions</code>
-            <p className="field-hint">
-              O header `x-testforge-scenario` controla a falha previsivel. O `Authorization`
-              define o papel ativo.
-            </p>
-          </div>
+          {guide ? (
+            <section className="panel">
+              <p className="eyebrow">O que praticar</p>
+              <div className="bullet-columns">
+                <div>
+                  <h3>Objetivos</h3>
+                  <ul className="plain-list compact-list">
+                    {guide.goals.map((goal) => (
+                      <li key={goal}>{goal}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3>Critérios</h3>
+                  <ul className="plain-list compact-list">
+                    {guide.successCriteria.map((criterion) => (
+                      <li key={criterion}>{criterion}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          <section className="panel">
+            <div className="mini-contract">
+              <p className="eyebrow">Contrato observado</p>
+              <code>POST /api/labs/advanced-form/submissions</code>
+              <p className="field-hint">
+                O header `x-testforge-scenario` controla a falha previsivel. O `Authorization`
+                define o papel ativo.
+              </p>
+            </div>
+          </section>
         </aside>
       </div>
     </section>
