@@ -56,8 +56,8 @@ export function ApiLabPage() {
       </div>
 
       <div className="lab-workspace">
-        <section className="editorial-panel">
-          <div className="action-row">
+        <section className="panel panel-strong">
+          <div className="action-row action-row-fill">
             <button
               className="primary-button"
               onClick={() => run(() => apiRequest<HealthResponse>('/api/health'))}
@@ -103,26 +103,29 @@ export function ApiLabPage() {
           </pre>
         </section>
 
-        <aside className="editorial-panel">
-          <p className="eyebrow">Contracts</p>
-          <div className="contract-list">
-            {contractCatalog.map((contract) => (
-              <article className="contract-item" key={contract.id}>
-                <header>
-                  <span className="contract-method">{contract.method}</span>
-                  <code>{contract.path}</code>
-                </header>
-                <p>{contract.description}</p>
-                <small>Erros previstos: {contract.errorStatuses.join(', ') || 'nenhum'}</small>
-              </article>
-            ))}
-          </div>
+        <aside className="info-rail">
+          <section className="panel">
+            <p className="eyebrow">Contracts</p>
+            <div className="contract-list">
+              {contractCatalog.map((contract) => (
+                <article className="contract-item" key={contract.id}>
+                  <header>
+                    <span className="contract-method">{contract.method}</span>
+                    <code>{contract.path}</code>
+                  </header>
+                  <p>{contract.description}</p>
+                  <small>Erros previstos: {contract.errorStatuses.join(', ') || 'nenhum'}</small>
+                </article>
+              ))}
+            </div>
 
-          {!session ? (
-            <p className="field-hint">
-              Para testar submits autenticados, entre com uma seed no <Link to="/entrar">login</Link>.
-            </p>
-          ) : null}
+            {!session ? (
+              <p className="field-hint">
+                Para testar submits autenticados, entre com uma seed no{' '}
+                <Link to="/entrar">login</Link>.
+              </p>
+            ) : null}
+          </section>
         </aside>
       </div>
     </section>

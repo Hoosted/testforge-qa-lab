@@ -20,7 +20,7 @@ export function A11yLabPage() {
       </div>
 
       <div className="split-layout">
-        <section className="editorial-panel">
+        <section className="panel">
           <h2>Checklist rapido</h2>
           <ul className="plain-list">
             <li>Verifique a ordem de tabulacao.</li>
@@ -30,7 +30,7 @@ export function A11yLabPage() {
           </ul>
         </section>
 
-        <section className="editorial-panel">
+        <section className="panel panel-strong">
           <h2>Live region</h2>
           <p aria-live="polite" className="status-note">
             {announcement}
@@ -45,18 +45,18 @@ export function A11yLabPage() {
         </section>
       </div>
 
-      <section className="editorial-panel">
+      <section className="panel">
         <h2 id={inputId}>Zona de formulario acessivel</h2>
         <div className="field-grid">
           <label className="field" htmlFor="email-a11y">
             Email para callback
-            <input id="email-a11y" name="email-a11y" type="email" />
+            <input className="field-control" id="email-a11y" name="email-a11y" type="email" />
             <span className="field-hint">Use este campo para testar associacao entre label e input.</span>
           </label>
 
           <label className="field" htmlFor="notes-a11y">
             Observacoes
-            <textarea id="notes-a11y" name="notes-a11y" rows={4} />
+            <textarea className="field-control" id="notes-a11y" name="notes-a11y" rows={4} />
           </label>
         </div>
       </section>

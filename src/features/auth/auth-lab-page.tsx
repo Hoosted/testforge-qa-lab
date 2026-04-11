@@ -17,7 +17,7 @@ export function AuthLabPage() {
       </div>
 
       <div className="split-layout">
-        <section className="editorial-panel">
+        <section className="panel">
           <h2>Credenciais seedadas</h2>
           <ul className="seed-list">
             {seedCredentials.map((seed) => (
@@ -30,7 +30,7 @@ export function AuthLabPage() {
           </ul>
         </section>
 
-        <section className="editorial-panel">
+        <section className="panel panel-strong">
           <h2>Estado atual da sessao</h2>
           {session ? (
             <div className="status-stack">
@@ -59,7 +59,7 @@ export function AuthLabPage() {
         </section>
       </div>
 
-      <section className="editorial-panel info-grid">
+      <section className="panel panel-subtle info-grid">
         <article>
           <p className="eyebrow">Admin</p>
           <h3>Pode enfileirar a submissao do wizard</h3>

@@ -37,11 +37,12 @@ export function LoginPage() {
       </div>
 
       <div className="auth-grid">
-        <form className="editorial-panel auth-form" onSubmit={handleSubmit}>
+        <form className="panel panel-strong form-stack" onSubmit={handleSubmit}>
           <label className="field">
             Email
             <input
               autoComplete="username"
+              className="field-control"
               name="email"
               onChange={(event) => {
                 clearError();
@@ -55,6 +56,7 @@ export function LoginPage() {
             Senha
             <input
               autoComplete="current-password"
+              className="field-control"
               name="password"
               onChange={(event) => {
                 clearError();
@@ -76,7 +78,7 @@ export function LoginPage() {
           </button>
         </form>
 
-        <aside className="editorial-panel credential-panel">
+        <aside className="panel">
           <p className="eyebrow">Seeds oficiais</p>
           <ul className="seed-list">
             {seedCredentials.map((seed) => (

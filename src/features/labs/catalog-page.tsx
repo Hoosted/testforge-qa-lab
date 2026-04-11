@@ -13,12 +13,12 @@ export function CatalogPage() {
         </p>
       </div>
 
-      <div className="catalog-grid">
+      <div className="catalog-list">
         {labs.map((lab) => {
           const guide = guides.find((entry) => entry.labId === lab.id);
 
           return (
-            <article className="catalog-card" key={lab.id}>
+            <article className="lab-list-item" key={lab.id}>
               <div className="catalog-meta">
                 <span>{lab.difficulty}</span>
                 <span>{lab.estimatedTime}</span>

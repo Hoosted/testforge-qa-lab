@@ -35,13 +35,18 @@ export function HomePage() {
             <strong>Deterministico por design.</strong>
             <p>Os cenarios de erro sao acionados por seed e header, nao por sorte.</p>
           </div>
+          <ul className="plain-list compact-list">
+            <li>UI, mocks e testes apontam para a mesma fonte de verdade.</li>
+            <li>Os labs mostram o que praticar antes de exigir setup demorado.</li>
+            <li>Estados relevantes ficam visiveis na interface e na rede.</li>
+          </ul>
         </div>
       </section>
 
-      <section className="editorial-strip">
+      <section className="split-layout split-layout-compact divider-section">
         <div>
           <p className="eyebrow">Como o produto pensa</p>
-          <h2>Quatro labs, uma fonte de verdade e a mesma camada de dados para UI, mock e teste.</h2>
+          <h2>Quatro labs, um sandbox deterministico e menos ruído antes da prática.</h2>
         </div>
         <p className="support-copy">
           O reboot abandona o produto legado e foca em superficies modulares. A primeira entrega ja
@@ -49,12 +54,23 @@ export function HomePage() {
         </p>
       </section>
 
-      <section className="feature-columns">
+      <section className="lab-list">
         {featuredLabs.map((lab) => (
-          <article className="feature-column" key={lab.id}>
-            <p className="eyebrow">{lab.difficulty}</p>
-            <h3>{lab.title}</h3>
+          <article className="lab-list-item" key={lab.id}>
+            <div className="catalog-meta">
+              <span>{lab.difficulty}</span>
+              <span>{lab.estimatedTime}</span>
+              <span>{lab.status}</span>
+            </div>
+            <h2>{lab.title}</h2>
             <p>{lab.summary}</p>
+            <div className="tag-row">
+              {lab.skills.map((skill) => (
+                <span className="mini-tag" key={skill}>
+                  {skill}
+                </span>
+              ))}
+            </div>
             <Link className="text-link" to={lab.route}>
               Abrir lab
             </Link>
