@@ -603,6 +603,24 @@ textarea.field-control {
   border-color: rgba(15, 118, 110, 0.45);
 }
 
+.field-set {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.field-set legend {
+  padding: 0 8px;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
 .field-toggle {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -627,6 +645,35 @@ textarea.field-control {
   width: 22px;
   height: 22px;
   margin-top: 2px;
+  accent-color: var(--teal);
+}
+
+.choice-list {
+  display: grid;
+  gap: 10px;
+}
+
+.choice-list-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.choice-item input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
   accent-color: var(--teal);
 }
 
@@ -832,6 +879,7 @@ textarea.field-control {
   .bullet-columns,
   .info-grid,
   .repeatable-row,
+  .choice-list-columns,
   .final-cta {
     grid-template-columns: 1fr;
   }
