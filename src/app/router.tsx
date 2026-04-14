@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { SiteLayout } from '@/components/site-layout';
+import { LabLayout } from '@/components/lab-layout';
+import { MarketingLayout } from '@/components/marketing-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { LoginPage } from '@/features/auth/login-page';
 import { HomePage } from '@/features/home/home-page';
@@ -12,12 +13,17 @@ import { A11yLabPage } from '@/features/a11y-lab/a11y-lab-page';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <SiteLayout />,
+    element: <MarketingLayout />,
     children: [
       {
         index: true,
         element: <HomePage />,
       },
+    ],
+  },
+  {
+    element: <LabLayout />,
+    children: [
       {
         path: 'entrar',
         element: <LoginPage />,
