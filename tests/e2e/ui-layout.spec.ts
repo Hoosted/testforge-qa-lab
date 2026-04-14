@@ -5,7 +5,7 @@ const publicPages = [
   {
     name: 'home',
     url: '/',
-    heading: /pratique testes onde os estados importam/i,
+    heading: /treine ui, api, auth e acessibilidade em um sandbox previsivel/i,
   },
   {
     name: 'catalogo',
