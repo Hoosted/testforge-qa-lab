@@ -1,90 +1,117 @@
 import { Link } from 'react-router-dom';
-import { labs } from '@/data/playground';
 
 export function HomePage() {
-  const featuredLabs = labs.slice(0, 3);
-
   return (
     <div className="home-shell">
-      <section className="hero-poster">
-        <div className="hero-copy">
-          <p className="eyebrow">Editorial QA playground</p>
-          <h1>Pratique testes onde os estados importam, nao onde o setup engole seu tempo.</h1>
-          <p className="lede">
-            TestForge nasceu para ser pequeno o bastante para entender em minutos e rico o bastante
-            para render boas suites de UI, API, auth e acessibilidade.
-          </p>
-          <div className="action-row">
-            <Link className="primary-link" to="/labs">
-              Explorar labs
-            </Link>
-            <Link className="secondary-link" to="/entrar">
-              Entrar com seed
+      <section className="home-hero">
+        <div className="home-hero-grid">
+          <div className="home-copy">
+            <p className="eyebrow">QA playground editorial</p>
+            <span className="home-kicker">TestForge QA Lab</span>
+            <h1>Treine UI, API, auth e acessibilidade em um sandbox previsivel.</h1>
+            <p className="lede">
+              Um laboratorio pequeno o bastante para entender rapido e realista o bastante para
+              render boas suites de teste com estados observaveis de verdade.
+            </p>
+            <Link className="primary-link home-cta" to="/labs">
+              Iniciar
             </Link>
           </div>
-        </div>
 
-        <div className="hero-rail">
-          <div className="rail-line">
-            <span>UI automation</span>
-            <span>API contracts</span>
-            <span>Auth & roles</span>
-            <span>A11y</span>
+          <div aria-hidden="true" className="home-visual">
+            <div className="signal-grid" />
+            <div className="signal-orb signal-orb-teal" />
+            <div className="signal-orb signal-orb-amber" />
+            <div className="signal-panel">
+              <p>Estados legiveis</p>
+              <strong>UI + rede + contrato em sincronia</strong>
+            </div>
+            <div className="signal-panel signal-panel-offset">
+              <p>Seeds fixas</p>
+              <strong>Falhas 401, 403, 409 e 500 acionaveis</strong>
+            </div>
           </div>
-          <div className="hero-note">
-            <strong>Deterministico por design.</strong>
-            <p>Os cenarios de erro sao acionados por seed e header, nao por sorte.</p>
-          </div>
-          <ul className="plain-list compact-list">
-            <li>UI, mocks e testes apontam para a mesma fonte de verdade.</li>
-            <li>Os labs mostram o que praticar antes de exigir setup demorado.</li>
-            <li>Estados relevantes ficam visiveis na interface e na rede.</li>
-          </ul>
         </div>
       </section>
 
-      <section className="split-layout split-layout-compact divider-section">
+      <section className="home-section home-section-split">
         <div>
-          <p className="eyebrow">Como o produto pensa</p>
-          <h2>Quatro labs, um sandbox deterministico e menos ruído antes da prática.</h2>
+          <p className="eyebrow">Como o sistema funciona</p>
+          <h2>Comece pela leitura do desafio, entre no lab e valide cada estado sem depender de sorte.</h2>
         </div>
-        <p className="support-copy">
-          O reboot abandona o produto legado e foca em superficies modulares. A primeira entrega ja
-          nasce com contratos tipados, identidade forte e um lab funcional de ponta a ponta.
-        </p>
-      </section>
 
-      <section className="lab-list">
-        {featuredLabs.map((lab) => (
-          <article className="lab-list-item" key={lab.id}>
-            <div className="catalog-meta">
-              <span>{lab.difficulty}</span>
-              <span>{lab.estimatedTime}</span>
-              <span>{lab.status}</span>
+        <div className="home-process-list">
+          <article>
+            <span>01</span>
+            <div>
+              <strong>Contexto claro antes da pratica</strong>
+              <p>
+                Cada area explica o que treinar, qual seed usar e como reconhecer sucesso pela UI
+                ou pela rede.
+              </p>
             </div>
-            <h2>{lab.title}</h2>
-            <p>{lab.summary}</p>
-            <div className="tag-row">
-              {lab.skills.map((skill) => (
-                <span className="mini-tag" key={skill}>
-                  {skill}
-                </span>
-              ))}
-            </div>
-            <Link className="text-link" to={lab.route}>
-              Abrir lab
-            </Link>
           </article>
-        ))}
+          <article>
+            <span>02</span>
+            <div>
+              <strong>Cenarios controlados por dados</strong>
+              <p>
+                Os labs nascem de definicoes tipadas, com cenarios e contratos compartilhados entre
+                componentes, mocks e testes.
+              </p>
+            </div>
+          </article>
+          <article>
+            <span>03</span>
+            <div>
+              <strong>Espaco seguro para portfolio</strong>
+              <p>
+                O setup local continua leve enquanto a pratica cobre wizard, auth, contratos e
+                acessibilidade.
+              </p>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section className="final-cta">
-        <div>
-          <p className="eyebrow">Fonte de verdade</p>
-          <h2>Produto, UI, arquitetura e criterios de evolucao vivem no `AGENTS.md`.</h2>
+      <section className="home-section home-section-detail">
+        <div className="detail-column">
+          <p className="eyebrow">Determinismo e observabilidade</p>
+          <h2>O foco aqui e treinar automacao reproduzivel, nao lutar contra um ambiente caprichoso.</h2>
         </div>
-        <Link className="secondary-link" to="/labs/formulario-avancado">
-          Abrir o lab principal
+
+        <div className="detail-grid">
+          <article className="detail-block">
+            <strong>UI que mostra o que importa</strong>
+            <p>
+              A interface expoe estados de loading, erro, permissao e validacao para que o QA veja
+              o comportamento antes de automatizar.
+            </p>
+          </article>
+          <article className="detail-block">
+            <strong>Rede previsivel via MSW</strong>
+            <p>
+              A API fake e a fonte de verdade da v1, com respostas estaveis, erros controlados e
+              contratos tipados compartilhados.
+            </p>
+          </article>
+          <article className="detail-block">
+            <strong>Seeds e perfis publicos</strong>
+            <p>
+              Admin e operator ajudam a praticar guardas, expiracao de sessao e diferenca entre
+              falha de fluxo e falha de autorizacao.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section className="home-final">
+        <div>
+          <p className="eyebrow">Pronto para praticar</p>
+          <h2>Entre na area de laboratorio e escolha o fluxo que voce quer automatizar primeiro.</h2>
+        </div>
+        <Link className="primary-link" to="/labs">
+          Iniciar
         </Link>
       </section>
     </div>
